@@ -14,20 +14,3 @@ impl IncusClient {
         .await
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn get_instance_by_name() {
-        let mut incus = IncusClient::try_default()
-            .await
-            .expect("IncusSdk::try_default");
-        let instance = incus
-            .get_instance_by_name("rust")
-            .await
-            .expect("incus.get_instance_by_name");
-        assert_eq!(instance.metadata.name, "rust");
-    }
-}

@@ -54,6 +54,56 @@ impl IncusClient {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_supported_version() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let instance = incus
+            .get_supported_version()
+            .await
+            .expect("incus.get_supported_version");
+
+        assert_eq!(instance.metadata, vec!["/1.0"]);
+    }
+
+    #[tokio::test]
+    async fn get_instances() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let instance = incus
+            .get_instances(None, None, None)
+            .await
+            .expect("incus.get_instances");
+
+        assert_eq!(
+            instance.metadata,
+            vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
+        );
+    }
+
+    #[tokio::test]
+    async fn get_instance_by_name() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let instance = incus
+            .get_instance_by_name("rust")
+            .await
+            .expect("incus.get_instance_by_name");
+
+        assert_eq!(instance.metadata.name, "rust");
+    }
+}
+
 // pub async fn instance() -> Instance {
 //     let mut client = ClientUnix::try_new("/run/incus/unix.socket")
 //         .await
