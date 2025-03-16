@@ -28,7 +28,7 @@ impl IncusClient {
         };
 
         self.send_request_incus::<(), IncusResponse<Vec<InstanceName>>>(
-            &format!("instances{query_string}"),
+            &format!("/instances{query_string}"),
             Method::GET,
             &[],
             None,

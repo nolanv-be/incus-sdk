@@ -38,7 +38,7 @@ impl IncusClient {
         match self
             .client
             .send_request_json::<IN, OUT, HttpError>(
-                &format!("/{}/{}", self.version, endpoint),
+                &format!("/{}{}", self.version, endpoint),
                 method,
                 &headers_concat,
                 body_request,
@@ -72,6 +72,20 @@ mod tests {
             .expect("incus.get_supported_version");
 
         assert_eq!(instance.metadata, IncusVersion("1.0".into()));
+    }
+
+    #[tokio::test]
+    async fn get_server() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let instance = incus
+            .get_server(None, None)
+            .await
+            .expect("incus.get_server");
+
+        assert_eq!(instance.metadata.api_version, "1.0");
     }
 
     #[tokio::test]

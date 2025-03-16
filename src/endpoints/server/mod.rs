@@ -50,4 +50,32 @@ impl IncusClient {
             Err(ErrorAndResponseJson::InternalError(e)) => Err(e.into()),
         }
     }
+
+    pub async fn get_server(
+        &mut self,
+        target: Option<&str>,
+        project: Option<&str>,
+    ) -> Result<IncusResponse<Server>, Error> {
+        let mut queries = Vec::new();
+        if let Some(target) = project {
+            queries.push(format!("target={target}"));
+        }
+        if let Some(project) = project {
+            queries.push(format!("project={project}"));
+        }
+
+        let query_string = if !queries.is_empty() {
+            format!("?{}", queries.join("&"))
+        } else {
+            "".into()
+        };
+
+        self.send_request_incus::<(), IncusResponse<Server>>(
+            &format!("{query_string}"),
+            Method::GET,
+            &[],
+            None,
+        )
+        .await
+    }
 }

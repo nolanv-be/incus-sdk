@@ -8,7 +8,7 @@ impl IncusClient {
         name: &str,
     ) -> Result<IncusResponse<Instance>, Error> {
         self.send_request_incus::<(), IncusResponse<Instance>>(
-            &format!("instances/{name}"),
+            &format!("/instances/{name}"),
             Method::GET,
             &[],
             None,
