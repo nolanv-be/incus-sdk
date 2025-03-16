@@ -56,6 +56,8 @@ impl IncusClient {
 
 #[cfg(test)]
 mod tests {
+    use types::IncusVersion;
+
     use super::*;
 
     #[tokio::test]
@@ -69,7 +71,7 @@ mod tests {
             .await
             .expect("incus.get_supported_version");
 
-        assert_eq!(instance.metadata, vec!["/1.0"]);
+        assert_eq!(instance.metadata, IncusVersion("1.0".into()));
     }
 
     #[tokio::test]
@@ -84,8 +86,13 @@ mod tests {
             .expect("incus.get_instances");
 
         assert_eq!(
-            instance.metadata,
-            vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
+            instance.metadata.first().map(|i| i.version()),
+            Some(Some("1.0".into()))
+        );
+
+        assert_eq!(
+            instance.metadata.first().map(|i| i.name()),
+            Some(Some("nodejs".into()))
         );
     }
 

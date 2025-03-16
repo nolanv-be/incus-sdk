@@ -1,35 +1,20 @@
-use std::collections::HashMap;
-
+use crate::types::*;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
+use std::collections::HashMap;
 
 /// [Instance] represents an instance
 #[derive(Deserialize, Debug)]
 pub struct Instance {
-    /// Status description
-    /// example: "Success"
-    pub status: String,
-    /// Status code
-    /// example: 200
-    pub status_code: usize,
-    /// Response type
-    /// example: "sync"
-    pub r#type: String,
-    /// Instance body data
-    pub metadata: InstanceMetadata,
-}
-
-/// [InstanceMetadata] is the body data of [Instance]
-#[derive(Deserialize, Debug)]
-pub struct InstanceMetadata {
     /// Architecture name
-    /// example: "x86_64"
-    pub architecture: String,
+    /// example: Architecture::X86_64
+    pub architecture: Architecture,
     /// Instance configuration
     /// example: HashMap::from(["security.nesting", "true"])
     pub config: HashMap<String, String>,
     /// Instance creation timestamp
     /// example: "2021-03-23T20:00:00-04:00"
-    pub created_at: String,
+    pub created_at: DateTime<Utc>,
     /// Instance description
     /// "My test instance"
     pub description: String,
@@ -47,7 +32,7 @@ pub struct InstanceMetadata {
     pub expanded_devices: HashMap<String, HashMap<String, String>>,
     /// Last start timestamp
     /// example: "2021-03-23T20:00:00-04:00"
-    pub last_used_at: String,
+    pub last_used_at: DateTime<Utc>,
     /// What cluster member this instance is located on
     /// example: server01
     pub location: String,
@@ -68,11 +53,11 @@ pub struct InstanceMetadata {
     pub stateful: bool,
     /// Instance status (see instance_state)
     /// example: "Running"
-    pub status: String,
+    pub status: Status,
     /// StatusCode represents a valid operation and container status
     /// example: 200
-    pub status_code: i64,
+    pub status_code: usize,
     /// The type of instance (container or virtual-machine)
     /// example: "container"
-    pub r#type: String,
+    pub r#type: InstanceType,
 }

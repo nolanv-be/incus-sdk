@@ -1,6 +1,6 @@
 pub mod by_name;
 
-use crate::{Error, IncusClient, types::IncusStrings};
+use crate::{Error, IncusClient, types::*};
 use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
@@ -9,7 +9,7 @@ impl IncusClient {
         project: Option<&str>,
         filter: Option<&str>,
         is_all_projects: Option<bool>,
-    ) -> Result<IncusStrings, Error> {
+    ) -> Result<IncusResponse<Vec<InstanceName>>, Error> {
         let mut queries = Vec::new();
         if let Some(project) = project {
             queries.push(format!("project={project}"));
@@ -27,7 +27,7 @@ impl IncusClient {
             "".into()
         };
 
-        self.send_request_incus::<(), IncusStrings>(
+        self.send_request_incus::<(), IncusResponse<Vec<InstanceName>>>(
             &format!("instances{query_string}"),
             Method::GET,
             &[],

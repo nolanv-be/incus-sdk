@@ -1,8 +1,9 @@
-use serde::Deserialize;
+use serde::{Deserialize, de::DeserializeOwned};
 
-/// Incus response containing Vector of strings
+/// Incus response containing metadata
 #[derive(Debug, Deserialize)]
-pub struct IncusStrings {
+#[serde(bound = "T: DeserializeOwned")]
+pub struct IncusResponse<T: DeserializeOwned> {
     /// Status description
     /// example: "Success"
     pub status: String,
@@ -12,7 +13,7 @@ pub struct IncusStrings {
     /// Response type
     /// example: "sync"
     pub r#type: String,
-    /// Vector of strings
+    /// Metadata deserializable
     /// example: vec!["/1.0/instances/foo", "/1.0/instances/bar"]
-    pub metadata: Vec<String>,
+    pub metadata: T,
 }
