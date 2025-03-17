@@ -56,6 +56,8 @@ impl IncusClient {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
 
     #[tokio::test]
@@ -88,6 +90,58 @@ mod tests {
         assert_eq!(
             server.get("api_version").map(|v| v.as_str()),
             Some(Some("1.0"))
+        );
+    }
+
+    #[tokio::test]
+    async fn get_resources() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let resources = incus
+            .get_resources(None)
+            .await
+            .expect("incus.get_resources")
+            .metadata;
+
+        assert_eq!(
+            resources
+                .get("cpu")
+                .map(|cpu| cpu.get("architecture").map(|arch| arch.as_str())),
+            Some(Some(Some("x86_64")))
+        );
+    }
+
+    #[tokio::test]
+    async fn patch_server() {
+        let mut incus = IncusClient::try_default()
+            .await
+            .expect("IncusSdk::try_default");
+
+        let time = format!("{:?}", std::time::Instant::now());
+        let result = incus
+            .patch_server(None, &HashMap::from([("user.test".into(), time.clone())]))
+            .await
+            .expect("incus.patch_server");
+
+        dbg!(&result);
+
+        assert_eq!(result.status_code, 200);
+
+        let server = incus
+            .get_server(None, None)
+            .await
+            .expect("incus.get_server")
+            .metadata;
+
+        dbg!(&server);
+
+        assert_eq!(
+            server
+                .get("config")
+                .map(|c| c.get("user.test").map(|t| t.as_str())),
+            Some(Some(Some(time.as_str())))
         );
     }
 

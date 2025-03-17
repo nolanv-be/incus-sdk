@@ -1,5 +1,7 @@
-use crate::{Error, IncusClient, types::*};
+// TODO get /1.0/events websocket ?
+use crate::{Error, IncusClient, build_query, types::*};
 use http_client_unix_domain_socket::{ErrorAndResponseJson, Method};
+use std::collections::HashMap;
 
 impl IncusClient {
     pub async fn get_supported_version(&mut self) -> Result<IncusResponse<String>, Error> {
@@ -39,22 +41,49 @@ impl IncusClient {
         target: Option<&str>,
         project: Option<&str>,
     ) -> Result<IncusResponse<serde_json::Value>, Error> {
-        let mut queries = Vec::new();
-        if let Some(target) = target {
-            queries.push(format!("target={target}"));
-        }
-        if let Some(project) = project {
-            queries.push(format!("project={project}"));
-        }
-
-        let query_string = if !queries.is_empty() {
-            format!("?{}", queries.join("&"))
-        } else {
-            "".into()
-        };
-
         self.send_request_incus::<(), IncusResponse<serde_json::Value>>(
-            &format!("{query_string}"),
+            &format!("{}", build_query!(target, project)),
+            Method::GET,
+            &[],
+            None,
+        )
+        .await
+    }
+
+    pub async fn patch_server(
+        &mut self,
+        target: Option<&str>,
+        config: &HashMap<String, String>,
+    ) -> Result<IncusEmptyResponse, Error> {
+        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, IncusEmptyResponse>(
+            &format!("{}", build_query!(target)),
+            Method::PATCH,
+            &[],
+            Some(&HashMap::from([("config".into(), config)])),
+        )
+        .await
+    }
+
+    pub async fn put_server(
+        &mut self,
+        target: Option<&str>,
+        config: &HashMap<String, String>,
+    ) -> Result<IncusEmptyResponse, Error> {
+        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, IncusEmptyResponse>(
+            &format!("{}", build_query!(target)),
+            Method::PUT,
+            &[],
+            Some(&HashMap::from([("config".into(), config)])),
+        )
+        .await
+    }
+
+    pub async fn get_resources(
+        &mut self,
+        target: Option<&str>,
+    ) -> Result<IncusResponse<serde_json::Value>, Error> {
+        self.send_request_incus::<(), IncusResponse<serde_json::Value>>(
+            &format!("/resources{}", build_query!(target)),
             Method::GET,
             &[],
             None,

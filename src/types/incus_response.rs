@@ -17,3 +17,17 @@ pub struct IncusResponse<T: DeserializeOwned> {
     /// example: vec!["/1.0/instances/foo", "/1.0/instances/bar"]
     pub metadata: T,
 }
+
+/// Incus empty response
+#[derive(Debug, Deserialize)]
+pub struct IncusEmptyResponse {
+    /// Status description
+    /// example: "Success"
+    pub status: String,
+    /// Status code
+    /// example: 200
+    pub status_code: usize,
+    /// Response type
+    /// example: "sync"
+    pub r#type: String,
+}
