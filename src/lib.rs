@@ -56,8 +56,6 @@ impl IncusClient {
 
 #[cfg(test)]
 mod tests {
-    use types::IncusVersion;
-
     use super::*;
 
     #[tokio::test]
@@ -66,12 +64,13 @@ mod tests {
             .await
             .expect("IncusSdk::try_default");
 
-        let instance = incus
+        let version = incus
             .get_supported_version()
             .await
-            .expect("incus.get_supported_version");
+            .expect("incus.get_supported_version")
+            .metadata;
 
-        assert_eq!(instance.metadata, IncusVersion("1.0".into()));
+        assert_eq!(&version, "/1.0");
     }
 
     #[tokio::test]
@@ -80,12 +79,16 @@ mod tests {
             .await
             .expect("IncusSdk::try_default");
 
-        let instance = incus
+        let server = incus
             .get_server(None, None)
             .await
-            .expect("incus.get_server");
+            .expect("incus.get_server")
+            .metadata;
 
-        assert_eq!(instance.metadata.api_version, "1.0");
+        assert_eq!(
+            server.get("api_version").map(|v| v.as_str()),
+            Some(Some("1.0"))
+        );
     }
 
     #[tokio::test]
@@ -94,19 +97,15 @@ mod tests {
             .await
             .expect("IncusSdk::try_default");
 
-        let instance = incus
+        let instances = incus
             .get_instances(None, None, None)
             .await
-            .expect("incus.get_instances");
+            .expect("incus.get_instances")
+            .metadata;
 
         assert_eq!(
-            instance.metadata.first().map(|i| i.version()),
-            Some(Some("1.0".into()))
-        );
-
-        assert_eq!(
-            instance.metadata.first().map(|i| i.name()),
-            Some(Some("nodejs".into()))
+            instances,
+            vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
         );
     }
 
@@ -119,32 +118,9 @@ mod tests {
         let instance = incus
             .get_instance_by_name("rust")
             .await
-            .expect("incus.get_instance_by_name");
+            .expect("incus.get_instance_by_name")
+            .metadata;
 
-        assert_eq!(instance.metadata.name, "rust");
+        assert_eq!(instance.get("name").map(|n| n.as_str()), Some(Some("rust")));
     }
 }
-
-// pub async fn instance() -> Instance {
-//     let mut client = ClientUnix::try_new("/run/incus/unix.socket")
-//         .await
-//         .expect("Try new");
-//
-//     let result = get_instance(&mut client, "rust").await;
-//
-//     dbg!(&result);
-//
-//     result.unwrap().1
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[tokio::test]
-//     async fn it_works() {
-//         let instance = instance().await;
-//         dbg!(&instance);
-//         assert_eq!(instance.metadata.name, "rust");
-//     }
-// }

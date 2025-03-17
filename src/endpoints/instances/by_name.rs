@@ -6,8 +6,8 @@ impl IncusClient {
     pub async fn get_instance_by_name(
         &mut self,
         name: &str,
-    ) -> Result<IncusResponse<Instance>, Error> {
-        self.send_request_incus::<(), IncusResponse<Instance>>(
+    ) -> Result<IncusResponse<serde_json::Value>, Error> {
+        self.send_request_incus::<(), IncusResponse<serde_json::Value>>(
             &format!("/instances/{name}"),
             Method::GET,
             &[],

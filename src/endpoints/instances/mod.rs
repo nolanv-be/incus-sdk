@@ -9,7 +9,7 @@ impl IncusClient {
         project: Option<&str>,
         filter: Option<&str>,
         is_all_projects: Option<bool>,
-    ) -> Result<IncusResponse<Vec<InstanceName>>, Error> {
+    ) -> Result<IncusResponse<Vec<String>>, Error> {
         let mut queries = Vec::new();
         if let Some(project) = project {
             queries.push(format!("project={project}"));
@@ -27,7 +27,7 @@ impl IncusClient {
             "".into()
         };
 
-        self.send_request_incus::<(), IncusResponse<Vec<InstanceName>>>(
+        self.send_request_incus::<(), IncusResponse<Vec<String>>>(
             &format!("/instances{query_string}"),
             Method::GET,
             &[],
