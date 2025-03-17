@@ -58,7 +58,7 @@ impl IncusClient {
 mod tests {
     use std::collections::HashMap;
 
-    use types::ApiStatus;
+    use types::*;
 
     use super::*;
 
@@ -93,6 +93,27 @@ mod tests {
             .metadata;
 
         assert_eq!(server.api_status(), Some(ApiStatus::Stable));
+        assert_eq!(server.auth_methods(), Some(vec![AuthMethod::Tls]));
+
+        assert_eq!(
+            server
+                .environment()
+                .expect("server.environment")
+                .storage_supported_drivers()
+                .expect("storage_supported_drivers")
+                .first()
+                .expect("first")
+                .name(),
+            Some(Storage::Dir)
+        );
+
+        assert_eq!(
+            server
+                .environment()
+                .expect("server.environment")
+                .architectures(),
+            Some(vec![Architecture::X86_64, Architecture::I686])
+        );
 
         assert_eq!(
             server.inner().get("api_version").map(|v| v.as_str()),
@@ -145,11 +166,8 @@ mod tests {
         dbg!(&server);
 
         assert_eq!(
-            server
-                .inner()
-                .get("config")
-                .map(|c| c.get("user.test").map(|t| t.as_str())),
-            Some(Some(Some(time.as_str())))
+            server.config().expect("server.config").get("user.test"),
+            Some(&time)
         );
     }
 
