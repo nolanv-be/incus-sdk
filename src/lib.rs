@@ -58,6 +58,8 @@ impl IncusClient {
 mod tests {
     use std::collections::HashMap;
 
+    use types::ApiStatus;
+
     use super::*;
 
     #[tokio::test]
@@ -67,12 +69,15 @@ mod tests {
             .expect("IncusSdk::try_default");
 
         let version = incus
-            .get_supported_version()
+            .get_supported_versions()
             .await
-            .expect("incus.get_supported_version")
+            .expect("incus.get_supported_versions")
             .metadata;
 
-        assert_eq!(&version, "/1.0");
+        assert_eq!(
+            version.first().map(|v| v.version()),
+            Some(Some("1.0".into()))
+        );
     }
 
     #[tokio::test]
@@ -87,8 +92,10 @@ mod tests {
             .expect("incus.get_server")
             .metadata;
 
+        assert_eq!(server.api_status(), Some(ApiStatus::Stable));
+
         assert_eq!(
-            server.get("api_version").map(|v| v.as_str()),
+            server.inner().get("api_version").map(|v| v.as_str()),
             Some(Some("1.0"))
         );
     }
@@ -139,6 +146,7 @@ mod tests {
 
         assert_eq!(
             server
+                .inner()
                 .get("config")
                 .map(|c| c.get("user.test").map(|t| t.as_str())),
             Some(Some(Some(time.as_str())))
