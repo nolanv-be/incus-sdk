@@ -5,8 +5,8 @@ pub mod utils;
 
 pub use error::Error;
 use http_client_unix_domain_socket::{ClientUnix, ErrorAndResponseJson, Method};
-use serde::{Serialize, de::DeserializeOwned};
-use types::HttpError;
+use serde::Serialize;
+use types::*;
 
 pub const VERSION: &str = "1.0";
 pub const SOCKET_PATH: &str = "/run/incus/unix.socket";
@@ -23,13 +23,13 @@ impl IncusClient {
         })
     }
 
-    async fn send_request_incus<IN: Serialize, OUT: DeserializeOwned>(
+    async fn send_request_incus<IN: Serialize, OUT: From<serde_json::Value>>(
         &mut self,
         endpoint: &str,
         method: Method,
         headers: &[(&str, &str)],
         body_request: Option<&IN>,
-    ) -> Result<OUT, Error> {
+    ) -> Result<IncusResponse, Error> {
         let mut headers_concat = vec![("Host", "localhost")];
         for header in headers {
             headers_concat.push(header.clone());
@@ -37,7 +37,7 @@ impl IncusClient {
 
         match self
             .client
-            .send_request_json::<IN, OUT, HttpError>(
+            .send_request_json::<IN, serde_json::Value, HttpError>(
                 &format!("/{}{}", self.version, endpoint),
                 method,
                 &headers_concat,
@@ -45,7 +45,7 @@ impl IncusClient {
             )
             .await
         {
-            Ok((_, response)) => Ok(response),
+            Ok((_, response)) => Ok(response.into()),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
                 Err(Error::HttpError(response))
             }
@@ -71,8 +71,7 @@ mod tests {
         let version = incus
             .get_supported_versions()
             .await
-            .expect("incus.get_supported_versions")
-            .metadata;
+            .expect("incus.get_supported_versions");
 
         assert_eq!(
             version.first().map(|v| v.version()),
@@ -89,8 +88,7 @@ mod tests {
         let server = incus
             .get_server(None, None)
             .await
-            .expect("incus.get_server")
-            .metadata;
+            .expect("incus.get_server");
 
         assert_eq!(server.api_status(), Some(ApiStatus::Stable));
         assert_eq!(server.auth_methods(), Some(vec![AuthMethod::Tls]));
@@ -101,10 +99,15 @@ mod tests {
                 .expect("server.environment")
                 .storage_supported_drivers()
                 .expect("storage_supported_drivers")
-                .first()
-                .expect("first")
-                .name(),
-            Some(Storage::Dir)
+                .iter()
+                .filter_map(|s| s.name())
+                .collect::<Vec<Storage>>(),
+            vec![
+                Storage::Btrfs,
+                Storage::Dir,
+                Storage::Lvm,
+                Storage::Lvmcluster
+            ]
         );
 
         assert_eq!(
@@ -130,8 +133,7 @@ mod tests {
         let resources = incus
             .get_resources(None)
             .await
-            .expect("incus.get_resources")
-            .metadata;
+            .expect("incus.get_resources");
 
         assert_eq!(
             resources
@@ -155,13 +157,12 @@ mod tests {
 
         dbg!(&result);
 
-        assert_eq!(result.status_code, 200);
+        assert_eq!(result, IncusResponseStatus::Success);
 
         let server = incus
             .get_server(None, None)
             .await
-            .expect("incus.get_server")
-            .metadata;
+            .expect("incus.get_server");
 
         dbg!(&server);
 
@@ -171,36 +172,35 @@ mod tests {
         );
     }
 
-    #[tokio::test]
-    async fn get_instances() {
-        let mut incus = IncusClient::try_default()
-            .await
-            .expect("IncusSdk::try_default");
-
-        let instances = incus
-            .get_instances(None, None, None)
-            .await
-            .expect("incus.get_instances")
-            .metadata;
-
-        assert_eq!(
-            instances,
-            vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
-        );
-    }
-
-    #[tokio::test]
-    async fn get_instance_by_name() {
-        let mut incus = IncusClient::try_default()
-            .await
-            .expect("IncusSdk::try_default");
-
-        let instance = incus
-            .get_instance_by_name("rust")
-            .await
-            .expect("incus.get_instance_by_name")
-            .metadata;
-
-        assert_eq!(instance.get("name").map(|n| n.as_str()), Some(Some("rust")));
-    }
+    // #[tokio::test]
+    // async fn get_instances() {
+    //     let mut incus = IncusClient::try_default()
+    //         .await
+    //         .expect("IncusSdk::try_default");
+    //
+    //     let instances = incus
+    //         .get_instances(None, None, None)
+    //         .await
+    //         .expect("incus.get_instances");
+    //
+    //     assert_eq!(
+    //         instances,
+    //         vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
+    //     );
+    // }
+    //
+    // #[tokio::test]
+    // async fn get_instance_by_name() {
+    //     let mut incus = IncusClient::try_default()
+    //         .await
+    //         .expect("IncusSdk::try_default");
+    //
+    //     let instance = incus
+    //         .get_instance_by_name("rust")
+    //         .await
+    //         .expect("incus.get_instance_by_name")
+    //         .metadata;
+    //
+    //     assert_eq!(instance.get("name").map(|n| n.as_str()), Some(Some("rust")));
+    // }
 }

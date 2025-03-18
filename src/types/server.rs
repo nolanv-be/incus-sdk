@@ -4,9 +4,9 @@ use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 pub struct Server(serde_json::Value);
-impl From<&serde_json::Value> for Server {
-    fn from(s: &serde_json::Value) -> Self {
-        Server(s.clone())
+impl From<serde_json::Value> for Server {
+    fn from(s: serde_json::Value) -> Self {
+        Server(s)
     }
 }
 

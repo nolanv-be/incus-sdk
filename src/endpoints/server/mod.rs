@@ -4,12 +4,10 @@ use http_client_unix_domain_socket::{ErrorAndResponseJson, Method};
 use std::collections::HashMap;
 
 impl IncusClient {
-    pub async fn get_supported_versions(
-        &mut self,
-    ) -> Result<IncusResponse<Vec<IncusVersion>>, Error> {
+    pub async fn get_supported_versions(&mut self) -> Result<Vec<IncusVersion>, Error> {
         match self
             .client
-            .send_request_json::<(), IncusResponse<Vec<String>>, HttpError>(
+            .send_request_json::<(), serde_json::Value, HttpError>(
                 "/",
                 Method::GET,
                 &vec![("Host", "localhost")],
@@ -17,16 +15,18 @@ impl IncusClient {
             )
             .await
         {
-            Ok((_, response)) => Ok(IncusResponse {
-                status: response.status,
-                status_code: response.status_code,
-                r#type: response.r#type,
-                metadata: response
-                    .metadata
-                    .iter()
-                    .map(|v| v.as_str().into())
-                    .collect(),
-            }),
+            Ok((_, response)) => response
+                .get("metadata")
+                .ok_or_else(|| Error::MissingField("metadata"))?
+                .as_array()
+                .ok_or_else(|| Error::MissingField("metadata"))?
+                .iter()
+                .map(|v| {
+                    v.as_str()
+                        .ok_or_else(|| Error::MissingField("metadata"))
+                        .map(|s| s.into())
+                })
+                .collect(),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
                 Err(Error::HttpError(response))
             }
@@ -38,54 +38,62 @@ impl IncusClient {
         &mut self,
         target: Option<&str>,
         project: Option<&str>,
-    ) -> Result<IncusResponse<Server>, Error> {
-        self.send_request_incus::<(), IncusResponse<Server>>(
+    ) -> Result<Server, Error> {
+        self.send_request_incus::<(), Server>(
             &format!("{}", build_query!(target, project)),
             Method::GET,
             &[],
             None,
         )
-        .await
+        .await?
+        .data()
+        .ok_or_else(|| Error::MissingField("metadata"))
     }
 
     pub async fn patch_server(
         &mut self,
         target: Option<&str>,
         config: &HashMap<String, String>,
-    ) -> Result<IncusEmptyResponse, Error> {
-        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, IncusEmptyResponse>(
+    ) -> Result<IncusResponseStatus, Error> {
+        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, serde_json::Value>(
             &format!("{}", build_query!(target)),
             Method::PATCH,
             &[],
             Some(&HashMap::from([("config".into(), config)])),
         )
-        .await
+        .await?
+        .status()
+        .ok_or_else(|| Error::MissingField("status_code"))
     }
 
     pub async fn put_server(
         &mut self,
         target: Option<&str>,
         config: &HashMap<String, String>,
-    ) -> Result<IncusEmptyResponse, Error> {
-        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, IncusEmptyResponse>(
+    ) -> Result<IncusResponseStatus, Error> {
+        self.send_request_incus::<HashMap<String, &HashMap<String, String>>, serde_json::Value>(
             &format!("{}", build_query!(target)),
             Method::PUT,
             &[],
             Some(&HashMap::from([("config".into(), config)])),
         )
-        .await
+        .await?
+        .status()
+        .ok_or_else(|| Error::MissingField("status_code"))
     }
 
     pub async fn get_resources(
         &mut self,
         target: Option<&str>,
-    ) -> Result<IncusResponse<serde_json::Value>, Error> {
-        self.send_request_incus::<(), IncusResponse<serde_json::Value>>(
+    ) -> Result<serde_json::Value, Error> {
+        self.send_request_incus::<(), serde_json::Value>(
             &format!("/resources{}", build_query!(target)),
             Method::GET,
             &[],
             None,
         )
-        .await
+        .await?
+        .data()
+        .ok_or_else(|| Error::MissingField("metadata"))
     }
 }

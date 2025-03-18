@@ -1,6 +1,6 @@
 pub mod by_name;
 
-use crate::{Error, IncusClient, types::*};
+use crate::{Error, IncusClient};
 use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
@@ -9,7 +9,7 @@ impl IncusClient {
         project: Option<&str>,
         filter: Option<&str>,
         is_all_projects: Option<bool>,
-    ) -> Result<IncusResponse<Vec<String>>, Error> {
+    ) -> Result<serde_json::Value, Error> {
         let mut queries = Vec::new();
         if let Some(project) = project {
             queries.push(format!("project={project}"));
@@ -27,12 +27,14 @@ impl IncusClient {
             "".into()
         };
 
-        self.send_request_incus::<(), IncusResponse<Vec<String>>>(
+        self.send_request_incus::<(), serde_json::Value>(
             &format!("/instances{query_string}"),
             Method::GET,
             &[],
             None,
         )
-        .await
+        .await?
+        .data()
+        .ok_or_else(|| Error::MissingField("metadata"))
     }
 }
