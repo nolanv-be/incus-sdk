@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use crate::{Error, error::FieldError};
+
 #[derive(Deserialize, Debug, PartialEq, Eq)]
 pub struct IncusVersion(String);
 impl From<&str> for IncusVersion {
@@ -11,7 +13,10 @@ impl IncusVersion {
     pub fn inner(&self) -> String {
         self.0.clone()
     }
-    pub fn version(&self) -> Option<String> {
-        self.0.split_once("/").map(|(_, version)| version.into())
+    pub fn version(&self) -> Result<String, Error> {
+        self.0
+            .split_once("/")
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|(_, version)| version.into())
     }
 }

@@ -1,3 +1,5 @@
+use crate::error::FieldError;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum ServerEventMode {
     FullMesh,
@@ -5,14 +7,14 @@ pub enum ServerEventMode {
     HubClient,
 }
 impl TryFrom<&str> for ServerEventMode {
-    type Error = ();
+    type Error = crate::Error;
 
     fn try_from(mode: &str) -> Result<Self, Self::Error> {
         match mode {
             "full-mesh" => Ok(ServerEventMode::FullMesh),
             "hub-server" => Ok(ServerEventMode::HubServer),
             "hub-client" => Ok(ServerEventMode::HubClient),
-            _ => Err(()),
+            _ => Err(FieldError::Unknown.into()),
         }
     }
 }

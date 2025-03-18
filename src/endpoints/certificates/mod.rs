@@ -1,6 +1,5 @@
-use crate::{Error, IncusClient, build_query, types::*};
+use crate::{Error, IncusClient, build_query};
 use http_client_unix_domain_socket::Method;
-use std::collections::HashMap;
 
 impl IncusClient {
     pub async fn get_certificates(
@@ -15,6 +14,5 @@ impl IncusClient {
         )
         .await?
         .data()
-        .ok_or_else(|| Error::MissingField("metadata"))
     }
 }

@@ -1,3 +1,5 @@
+use crate::error::FieldError;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Storage {
     Btrfs,
@@ -10,7 +12,7 @@ pub enum Storage {
     Zfs,
 }
 impl TryFrom<&str> for Storage {
-    type Error = ();
+    type Error = crate::Error;
 
     fn try_from(storage: &str) -> Result<Self, Self::Error> {
         match storage {
@@ -22,7 +24,7 @@ impl TryFrom<&str> for Storage {
             "lvm" => Ok(Storage::Lvm),
             "lvmcluster" => Ok(Storage::Lvmcluster),
             "zfs" => Ok(Storage::Zfs),
-            _ => Err(()),
+            _ => Err(FieldError::Unknown.into()),
         }
     }
 }

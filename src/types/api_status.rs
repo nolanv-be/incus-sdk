@@ -1,3 +1,5 @@
+use crate::error::FieldError;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum ApiStatus {
     Devel,
@@ -5,14 +7,14 @@ pub enum ApiStatus {
     Deprecated,
 }
 impl TryFrom<&str> for ApiStatus {
-    type Error = ();
+    type Error = crate::Error;
 
     fn try_from(api: &str) -> Result<Self, Self::Error> {
         match api {
             "devel" => Ok(ApiStatus::Devel),
             "stable" => Ok(ApiStatus::Stable),
             "deprecated" => Ok(ApiStatus::Deprecated),
-            _ => Err(()),
+            _ => Err(FieldError::Unknown.into()),
         }
     }
 }

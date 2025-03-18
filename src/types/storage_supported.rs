@@ -1,10 +1,10 @@
-use crate::types::Storage;
+use crate::{Error, error::FieldError, types::Storage};
 
 #[derive(Debug)]
 pub struct StorageSupported(serde_json::Value);
-impl From<&serde_json::Value> for StorageSupported {
-    fn from(s: &serde_json::Value) -> Self {
-        StorageSupported(s.clone())
+impl From<serde_json::Value> for StorageSupported {
+    fn from(s: serde_json::Value) -> Self {
+        StorageSupported(s)
     }
 }
 
@@ -13,15 +13,30 @@ impl StorageSupported {
         self.0.clone()
     }
 
-    pub fn name(&self) -> Option<Storage> {
-        self.inner().get("Name")?.as_str()?.try_into().ok()
+    pub fn name(&self) -> Result<Storage, Error> {
+        self.inner()
+            .get("Name")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid)?
+            .try_into()
     }
 
-    pub fn remote(&self) -> Option<bool> {
-        Some(self.inner().get("Remote")?.as_bool()?.into())
+    pub fn remote(&self) -> Result<bool, Error> {
+        self.inner()
+            .get("Remote")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_bool()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .into()
     }
 
-    pub fn api_version(&self) -> Option<String> {
-        self.inner().get("Version")?.as_str()?.try_into().ok()
+    pub fn api_version(&self) -> Result<String, Error> {
+        self.inner()
+            .get("Version")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|s| s.into())
     }
 }

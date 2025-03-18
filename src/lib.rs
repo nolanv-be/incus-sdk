@@ -1,5 +1,5 @@
 mod endpoints;
-mod error;
+pub mod error;
 pub mod types;
 pub mod utils;
 
@@ -37,7 +37,7 @@ impl IncusClient {
 
         match self
             .client
-            .send_request_json::<IN, serde_json::Value, HttpError>(
+            .send_request_json::<IN, serde_json::Value, IncusResponseError>(
                 &format!("/{}{}", self.version, endpoint),
                 method,
                 &headers_concat,
@@ -47,7 +47,7 @@ impl IncusClient {
         {
             Ok((_, response)) => Ok(response.into()),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
-                Err(Error::HttpError(response))
+                Err(Error::Http(response))
             }
             Err(ErrorAndResponseJson::InternalError(e)) => Err(e.into()),
         }
@@ -56,11 +56,8 @@ impl IncusClient {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
-    use types::*;
-
     use super::*;
+    use std::collections::HashMap;
 
     #[tokio::test]
     async fn get_supported_version() {
@@ -74,8 +71,8 @@ mod tests {
             .expect("incus.get_supported_versions");
 
         assert_eq!(
-            version.first().map(|v| v.version()),
-            Some(Some("1.0".into()))
+            version.first().expect("first").version().expect("version"),
+            "1.0"
         );
     }
 
@@ -90,8 +87,14 @@ mod tests {
             .await
             .expect("incus.get_server");
 
-        assert_eq!(server.api_status(), Some(ApiStatus::Stable));
-        assert_eq!(server.auth_methods(), Some(vec![AuthMethod::Tls]));
+        assert_eq!(
+            server.api_status().expect("server.api_status"),
+            ApiStatus::Stable
+        );
+        assert_eq!(
+            server.auth_methods().expect("server.auth_methods"),
+            vec![AuthMethod::Tls]
+        );
 
         assert_eq!(
             server
@@ -100,7 +103,7 @@ mod tests {
                 .storage_supported_drivers()
                 .expect("storage_supported_drivers")
                 .iter()
-                .filter_map(|s| s.name())
+                .map(|s| s.name().expect("storage_supported_drivers.name"))
                 .collect::<Vec<Storage>>(),
             vec![
                 Storage::Btrfs,
@@ -114,8 +117,9 @@ mod tests {
             server
                 .environment()
                 .expect("server.environment")
-                .architectures(),
-            Some(vec![Architecture::X86_64, Architecture::I686])
+                .architectures()
+                .expect("environment.architecture"),
+            vec![Architecture::X86_64, Architecture::I686]
         );
 
         assert_eq!(

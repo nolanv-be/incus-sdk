@@ -1,5 +1,5 @@
 // TODO get /1.0/events websocket ?
-use crate::{Error, IncusClient, build_query, types::*};
+use crate::{Error, IncusClient, build_query, error::FieldError, types::*};
 use http_client_unix_domain_socket::{ErrorAndResponseJson, Method};
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ impl IncusClient {
     pub async fn get_supported_versions(&mut self) -> Result<Vec<IncusVersion>, Error> {
         match self
             .client
-            .send_request_json::<(), serde_json::Value, HttpError>(
+            .send_request_json::<(), serde_json::Value, IncusResponseError>(
                 "/",
                 Method::GET,
                 &vec![("Host", "localhost")],
@@ -17,18 +17,18 @@ impl IncusClient {
         {
             Ok((_, response)) => response
                 .get("metadata")
-                .ok_or_else(|| Error::MissingField("metadata"))?
+                .ok_or_else(|| FieldError::Missing)?
                 .as_array()
-                .ok_or_else(|| Error::MissingField("metadata"))?
+                .ok_or_else(|| FieldError::Invalid)?
                 .iter()
                 .map(|v| {
                     v.as_str()
-                        .ok_or_else(|| Error::MissingField("metadata"))
+                        .ok_or_else(|| FieldError::Invalid.into())
                         .map(|s| s.into())
                 })
                 .collect(),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
-                Err(Error::HttpError(response))
+                Err(Error::Http(response))
             }
             Err(ErrorAndResponseJson::InternalError(e)) => Err(e.into()),
         }
@@ -47,7 +47,6 @@ impl IncusClient {
         )
         .await?
         .data()
-        .ok_or_else(|| Error::MissingField("metadata"))
     }
 
     pub async fn patch_server(
@@ -63,7 +62,6 @@ impl IncusClient {
         )
         .await?
         .status()
-        .ok_or_else(|| Error::MissingField("status_code"))
     }
 
     pub async fn put_server(
@@ -79,7 +77,6 @@ impl IncusClient {
         )
         .await?
         .status()
-        .ok_or_else(|| Error::MissingField("status_code"))
     }
 
     pub async fn get_resources(
@@ -94,6 +91,5 @@ impl IncusClient {
         )
         .await?
         .data()
-        .ok_or_else(|| Error::MissingField("metadata"))
     }
 }

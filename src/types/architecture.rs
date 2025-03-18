@@ -1,3 +1,5 @@
+use crate::error::FieldError;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Architecture {
     I686,
@@ -17,7 +19,7 @@ pub enum Architecture {
     Loongarch64,
 }
 impl TryFrom<&str> for Architecture {
-    type Error = ();
+    type Error = crate::Error;
 
     fn try_from(arch: &str) -> Result<Self, Self::Error> {
         match arch {
@@ -36,7 +38,7 @@ impl TryFrom<&str> for Architecture {
             "riscv32" => Ok(Architecture::Riscv32),
             "riscv64" => Ok(Architecture::Riscv64),
             "loongarch64" => Ok(Architecture::Loongarch64),
-            _ => Err(()),
+            _ => Err(FieldError::Unknown.into()),
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::{Error, error::FieldError, types::*};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -15,49 +15,97 @@ impl Server {
         self.0.clone()
     }
 
-    pub fn api_extensions(&self) -> Option<Vec<String>> {
+    pub fn api_extensions(&self) -> Result<Vec<String>, Error> {
         self.inner()
-            .get("api_extensions")?
-            .as_array()?
+            .get("api_extensions")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_array()
+            .ok_or_else(|| FieldError::Invalid)?
             .into_iter()
-            .map(|api| api.as_str().map(|s| s.to_string()))
-            .collect::<Option<Vec<String>>>()
+            .map(|api| {
+                api.as_str()
+                    .ok_or_else(|| FieldError::Invalid.into())
+                    .map(|s| s.to_string())
+            })
+            .collect()
     }
 
-    pub fn api_status(&self) -> Option<ApiStatus> {
-        self.inner().get("api_status")?.as_str()?.try_into().ok()
-    }
-
-    pub fn api_version(&self) -> Option<String> {
-        self.inner().get("api_version")?.as_str()?.try_into().ok()
-    }
-
-    pub fn auth(&self) -> Option<Auth> {
-        self.inner().get("auth")?.as_str()?.try_into().ok()
-    }
-
-    pub fn auth_methods(&self) -> Option<Vec<AuthMethod>> {
+    pub fn api_status(&self) -> Result<ApiStatus, Error> {
         self.inner()
-            .get("auth_methods")?
-            .as_array()?
+            .get("api_status")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid)?
+            .try_into()
+    }
+
+    pub fn api_version(&self) -> Result<String, Error> {
+        self.inner()
+            .get("api_version")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|s| s.into())
+    }
+
+    pub fn auth(&self) -> Result<Auth, Error> {
+        self.inner()
+            .get("auth")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid)?
+            .try_into()
+    }
+
+    pub fn auth_methods(&self) -> Result<Vec<AuthMethod>, Error> {
+        self.inner()
+            .get("auth_methods")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_array()
+            .ok_or_else(|| FieldError::Invalid)?
             .into_iter()
-            .filter_map(|api| api.as_str().map(|s| s.try_into().ok()))
-            .collect::<Option<Vec<AuthMethod>>>()
+            .map(|method| {
+                method
+                    .as_str()
+                    .ok_or_else(|| FieldError::Invalid)
+                    .map(|s| s.try_into())
+            })
+            .flatten()
+            .collect::<Result<Vec<AuthMethod>, Error>>()
     }
 
-    pub fn auth_user_method(&self) -> Option<String> {
-        Some(self.inner().get("auth_user_method")?.as_str()?.into())
+    pub fn auth_user_method(&self) -> Result<String, Error> {
+        self.inner()
+            .get("auth_user_method")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|s| s.into())
     }
 
-    pub fn auth_user_name(&self) -> Option<String> {
-        Some(self.inner().get("auth_user_name")?.as_str()?.into())
+    pub fn auth_user_name(&self) -> Result<String, Error> {
+        self.inner()
+            .get("auth_user_name")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_str()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|s| s.into())
     }
 
-    pub fn config(&self) -> Option<HashMap<String, String>> {
-        serde_json::from_value(self.inner().get("config")?.to_owned()).ok()
+    pub fn config(&self) -> Result<HashMap<String, String>, Error> {
+        serde_json::from_value(
+            self.inner()
+                .get("config")
+                .ok_or_else(|| FieldError::Missing)?
+                .clone(),
+        )
+        .map_err(|_| FieldError::Invalid.into())
     }
 
-    pub fn environment(&self) -> Option<ServerEnvironment> {
-        self.inner().get("environment").map(|e| e.into())
+    pub fn environment(&self) -> Result<ServerEnvironment, Error> {
+        self.inner()
+            .get("environment")
+            .ok_or_else(|| FieldError::Missing.into())
+            .map(|e| e.clone().into())
     }
 }

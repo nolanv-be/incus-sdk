@@ -35,6 +35,5 @@ impl IncusClient {
         )
         .await?
         .data()
-        .ok_or_else(|| Error::MissingField("metadata"))
     }
 }
