@@ -1,4 +1,6 @@
-use crate::{Error, error::FieldError, types::Storage};
+use crate::{
+    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, types::Storage,
+};
 
 #[derive(Debug)]
 pub struct StorageSupported(serde_json::Value);
@@ -13,14 +15,7 @@ impl StorageSupported {
         self.0.clone()
     }
 
-    pub fn name(&self) -> Result<Storage, Error> {
-        self.inner()
-            .get("Name")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(name, "Name", Storage);
 
     pub fn remote(&self) -> Result<bool, Error> {
         self.inner()
@@ -30,13 +25,5 @@ impl StorageSupported {
             .ok_or_else(|| FieldError::Invalid.into())
             .into()
     }
-
-    pub fn api_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("Version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(version, "Version");
 }

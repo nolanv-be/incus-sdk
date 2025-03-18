@@ -1,4 +1,4 @@
-use crate::{Error, error::FieldError};
+use crate::{Error, error::FieldError, inner_to_struct_method};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -23,14 +23,7 @@ impl IncusResponse {
             .try_into()
     }
 
-    pub fn response_type(&self) -> Result<IncusResponseType, Error> {
-        self.inner()
-            .get("type")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(response_type, "type", IncusResponseType);
 
     pub fn data<DATA: From<serde_json::Value>>(&self) -> Result<DATA, Error> {
         self.inner()
@@ -130,14 +123,7 @@ impl IncusResponseError {
             .try_into()
     }
 
-    pub fn response_type(&self) -> Result<IncusResponseType, Error> {
-        self.inner()
-            .get("type")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(response_type, "type", IncusResponseType);
 }
 
 #[derive(Debug, Eq, PartialEq)]

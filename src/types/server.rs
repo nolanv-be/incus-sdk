@@ -1,4 +1,7 @@
-use crate::{Error, error::FieldError, types::*};
+use crate::{
+    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
+    inner_to_vec_struct_method, types::*,
+};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -15,82 +18,19 @@ impl Server {
         self.0.clone()
     }
 
-    pub fn api_extensions(&self) -> Result<Vec<String>, Error> {
-        self.inner()
-            .get("api_extensions")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .into_iter()
-            .map(|api| {
-                api.as_str()
-                    .ok_or_else(|| FieldError::Invalid.into())
-                    .map(|s| s.to_string())
-            })
-            .collect()
-    }
+    inner_to_vec_str_method!(api_extensions, "api_extensions");
 
-    pub fn api_status(&self) -> Result<ApiStatus, Error> {
-        self.inner()
-            .get("api_status")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(api_status, "api_status", ApiStatus);
 
-    pub fn api_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("api_version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(api_version, "api_version");
 
-    pub fn auth(&self) -> Result<Auth, Error> {
-        self.inner()
-            .get("auth")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(auth, "auth", Auth);
 
-    pub fn auth_methods(&self) -> Result<Vec<AuthMethod>, Error> {
-        self.inner()
-            .get("auth_methods")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .into_iter()
-            .map(|method| {
-                method
-                    .as_str()
-                    .ok_or_else(|| FieldError::Invalid)
-                    .map(|s| s.try_into())
-            })
-            .flatten()
-            .collect::<Result<Vec<AuthMethod>, Error>>()
-    }
+    inner_to_vec_struct_method!(auth_methods, "auth_methods", AuthMethod);
 
-    pub fn auth_user_method(&self) -> Result<String, Error> {
-        self.inner()
-            .get("auth_user_method")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(auth_user_method, "auth_user_method");
 
-    pub fn auth_user_name(&self) -> Result<String, Error> {
-        self.inner()
-            .get("auth_user_name")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(auth_user_name, "auth_user_name");
 
     pub fn config(&self) -> Result<HashMap<String, String>, Error> {
         serde_json::from_value(

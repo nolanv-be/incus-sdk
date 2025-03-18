@@ -1,4 +1,7 @@
-use crate::{Error, error::FieldError, types::*};
+use crate::{
+    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
+    inner_to_vec_struct_method, types::*,
+};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -15,107 +18,23 @@ impl ServerEnvironment {
         self.0.clone()
     }
 
-    pub fn addresses(&self) -> Result<Vec<String>, Error> {
-        self.inner()
-            .get("addresses")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .into_iter()
-            .map(|addr| {
-                addr.as_str()
-                    .ok_or_else(|| FieldError::Invalid.into())
-                    .map(|s| s.to_string())
-            })
-            .collect()
-    }
+    inner_to_vec_str_method!(addresses, "addresses");
 
-    pub fn architectures(&self) -> Result<Vec<Architecture>, Error> {
-        self.inner()
-            .get("architectures")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .into_iter()
-            .map(|method| {
-                method
-                    .as_str()
-                    .ok_or_else(|| FieldError::Invalid)
-                    .map(|s| s.try_into())
-            })
-            .flatten()
-            .collect::<Result<Vec<Architecture>, Error>>()
-    }
+    inner_to_vec_struct_method!(architectures, "architectures", Architecture);
 
-    pub fn certificate(&self) -> Result<String, Error> {
-        self.inner()
-            .get("certificate")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(certificate, "certificate");
 
-    pub fn certificate_fingerprint(&self) -> Result<String, Error> {
-        self.inner()
-            .get("certificate_fingerprint")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(certificate_fingerprint, "certificate_fingerprint");
 
-    pub fn driver(&self) -> Result<Vec<Driver>, Error> {
-        self.inner()
-            .get("driver")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .into_iter()
-            .map(|d| {
-                d.as_str()
-                    .ok_or_else(|| FieldError::Invalid)
-                    .map(|s| s.try_into())
-            })
-            .flatten()
-            .collect::<Result<Vec<Driver>, Error>>()
-    }
+    inner_to_vec_struct_method!(driver, "driver", Driver);
 
-    pub fn driver_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("driver_version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(driver_version, "driver_version");
 
-    pub fn firewall(&self) -> Result<Firewall, Error> {
-        self.inner()
-            .get("firewall")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(firewall, "firewall", Firewall);
 
-    pub fn kernel(&self) -> Result<String, Error> {
-        self.inner()
-            .get("kernel")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(kernel, "kernel");
 
-    pub fn kernel_architecture(&self) -> Result<Architecture, Error> {
-        self.inner()
-            .get("kernel_architecture")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(kernel_architecture, "kernel_architecture", Architecture);
 
     pub fn kernel_features(&self) -> Result<HashMap<String, String>, Error> {
         serde_json::from_value(
@@ -127,14 +46,7 @@ impl ServerEnvironment {
         .map_err(|_| FieldError::Invalid.into())
     }
 
-    pub fn kernel_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("kernel_version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(kernel_version, "kernel_version");
 
     pub fn lxc_features(&self) -> Result<HashMap<String, String>, Error> {
         serde_json::from_value(
@@ -146,32 +58,11 @@ impl ServerEnvironment {
         .map_err(|_| FieldError::Invalid.into())
     }
 
-    pub fn os_name(&self) -> Result<String, Error> {
-        self.inner()
-            .get("os_name")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(os_name, "os_name");
 
-    pub fn project(&self) -> Result<String, Error> {
-        self.inner()
-            .get("project")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(project, "project");
 
-    pub fn server(&self) -> Result<String, Error> {
-        self.inner()
-            .get("server")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(server, "server");
 
     pub fn server_clustered(&self) -> Result<bool, Error> {
         self.inner()
@@ -182,23 +73,9 @@ impl ServerEnvironment {
             .into()
     }
 
-    pub fn server_event_mode(&self) -> Result<ServerEventMode, Error> {
-        self.inner()
-            .get("server_event_mode")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(server_event_mode, "server_event_mode", ServerEventMode);
 
-    pub fn server_name(&self) -> Result<String, Error> {
-        self.inner()
-            .get("server_name")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(server_name, "server_name");
 
     pub fn server_pid(&self) -> Result<u64, Error> {
         self.inner()
@@ -209,23 +86,9 @@ impl ServerEnvironment {
             .map(|s| s.into())
     }
 
-    pub fn server_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("server_version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(server_version, "server_version");
 
-    pub fn storage(&self) -> Result<Storage, Error> {
-        self.inner()
-            .get("storage")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
-            .try_into()
-    }
+    inner_to_struct_method!(storage, "storage", Storage);
 
     pub fn storage_supported_drivers(&self) -> Result<Vec<StorageSupported>, Error> {
         Ok(self
@@ -239,12 +102,5 @@ impl ServerEnvironment {
             .collect())
     }
 
-    pub fn storage_version(&self) -> Result<String, Error> {
-        self.inner()
-            .get("storage_version")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_str()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_str_method!(storage_version, "storage_version");
 }
