@@ -16,13 +16,57 @@ impl IncusClient {
         .data()
     }
 
+    pub async fn get_certificate(
+        &mut self,
+        fingerprint: &str,
+    ) -> Result<CertificateReturned, Error> {
+        self.send_request_incus::<(), CertificateReturned>(
+            &format!("/certificates/{fingerprint}"),
+            Method::GET,
+            &[],
+            None,
+        )
+        .await?
+        .data()
+    }
+
     pub async fn post_certificate(
         &mut self,
-        certificate: &certificate::post::Certificate,
+        certificate: &CertificateFull,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<certificate::post::Certificate, serde_json::Value>(
+        self.send_request_incus::<CertificateFull, serde_json::Value>(
             "/certificates",
             Method::POST,
+            &[],
+            Some(certificate),
+        )
+        .await?
+        .status()
+    }
+
+    pub async fn patch_certificate(
+        &mut self,
+        fingerprint: &str,
+        certificate: &CertificatePartial,
+    ) -> Result<IncusResponseStatus, Error> {
+        self.send_request_incus::<CertificatePartial, serde_json::Value>(
+            &format!("/certificates/{fingerprint}"),
+            Method::PATCH,
+            &[],
+            Some(certificate),
+        )
+        .await?
+        .status()
+    }
+
+    pub async fn put_certificate(
+        &mut self,
+        fingerprint: &str,
+        certificate: &CertificateFull,
+    ) -> Result<IncusResponseStatus, Error> {
+        self.send_request_incus::<CertificateFull, serde_json::Value>(
+            &format!("/certificates/{fingerprint}"),
+            Method::PUT,
             &[],
             Some(certificate),
         )

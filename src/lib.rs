@@ -52,8 +52,13 @@ impl IncusClient {
             Err(ErrorAndResponseJson::InternalError(e)) => Err(e.into()),
         }
     }
+
+    pub async fn abort_connection(self) -> Option<Error> {
+        self.client.abort().await.map(|e| Error::ClientUnix(e))
+    }
 }
 
+// TODO Temporary test while implementing
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,16 +164,12 @@ mod tests {
             .await
             .expect("incus.patch_server");
 
-        dbg!(&result);
-
         assert_eq!(result, IncusResponseStatus::Success);
 
         let server = incus
             .get_server(None, None)
             .await
             .expect("incus.get_server");
-
-        dbg!(&server);
 
         assert_eq!(
             server.config().expect("server.config").get("user.test"),
@@ -177,7 +178,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn certificates() {
+    async fn crud_certificate() {
+        const FINGERPRINT: &str =
+            "19d41e4e88554147821a6ffeec95aad6d787f9abccf57c1e13faa2d7313c26df";
+        let original_certificate = CertificateFull {
+                certificate: "MIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p".into(),
+                description: "this is a test".into(),
+                name: "test".into(),
+                projects: vec!["default".into()],
+                restricted: true,
+                certificate_type: CertificateType::Client,
+            };
+
         let mut incus = IncusClient::try_default()
             .await
             .expect("IncusSdk::try_default");
@@ -190,7 +202,6 @@ mod tests {
             .expect("certificates.fingerprints")
             .first()
         {
-            dbg!(&fingerprint);
             incus
                 .delete_certificate(&fingerprint)
                 .await
@@ -198,16 +209,7 @@ mod tests {
         }
 
         incus
-            .post_certificate(&certificate::post::Certificate {
-                certificate: "MIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p".into(),
-                description: "this is a test".into(),
-                name: "test".into(),
-                projects: vec!["default".into()],
-                restricted: true,
-                token: false,
-                trust_token: "".into(),
-                certificate_type: CertificateType::Client,
-            })
+            .post_certificate(&original_certificate)
             .await
             .expect("incus.post_certificate");
 
@@ -218,41 +220,59 @@ mod tests {
             .fingerprints()
             .expect("certificates.fingerprints");
 
-        assert_eq!(
-            fingerprints,
-            vec!["19d41e4e88554147821a6ffeec95aad6d787f9abccf57c1e13faa2d7313c26df".to_string()]
-        );
-    }
+        assert_eq!(fingerprints, vec![FINGERPRINT.to_string()]);
 
-    // #[tokio::test]
-    // async fn get_instances() {
-    //     let mut incus = IncusClient::try_default()
-    //         .await
-    //         .expect("IncusSdk::try_default");
-    //
-    //     let instances = incus
-    //         .get_instances(None, None, None)
-    //         .await
-    //         .expect("incus.get_instances");
-    //
-    //     assert_eq!(
-    //         instances,
-    //         vec!["/1.0/instances/nodejs", "/1.0/instances/rust"]
-    //     );
-    // }
-    //
-    // #[tokio::test]
-    // async fn get_instance_by_name() {
-    //     let mut incus = IncusClient::try_default()
-    //         .await
-    //         .expect("IncusSdk::try_default");
-    //
-    //     let instance = incus
-    //         .get_instance_by_name("rust")
-    //         .await
-    //         .expect("incus.get_instance_by_name")
-    //         .metadata;
-    //
-    //     assert_eq!(instance.get("name").map(|n| n.as_str()), Some(Some("rust")));
-    // }
+        let certificate = incus
+            .get_certificate(FINGERPRINT)
+            .await
+            .expect("incus.get_certificate");
+
+        assert_eq!(
+            certificate.name().expect("certificate.name"),
+            "test".to_string()
+        );
+
+        incus
+            .patch_certificate(
+                &FINGERPRINT,
+                &CertificatePartial {
+                    certificate: None,
+                    description: None,
+                    name: Some("test2".into()),
+                    projects: None,
+                    restricted: None,
+                    token: None,
+                    trust_token: None,
+                    certificate_type: None,
+                },
+            )
+            .await
+            .expect("incus.patch_certificate");
+
+        let certificate = incus
+            .get_certificate(FINGERPRINT)
+            .await
+            .expect("incus.get_certificate");
+
+        assert_eq!(
+            certificate.name().expect("certificate.name"),
+            "test2".to_string()
+        );
+
+        // Issue: https://github.com/lxc/incus/issues/1815
+        // let result = incus
+        //     .put_certificate(&FINGERPRINT, &original_certificate)
+        //     .await
+        //     .expect("incus.put_certificate");
+        //
+        // let certificate = incus
+        //     .get_certificate(FINGERPRINT)
+        //     .await
+        //     .expect("incus.get_certificate");
+        //
+        // assert_eq!(
+        //     certificate.name().expect("certificate.name"),
+        //     "test".to_string()
+        // );
+    }
 }
