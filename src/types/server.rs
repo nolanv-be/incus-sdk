@@ -1,6 +1,6 @@
 use crate::{
-    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
-    inner_to_vec_struct_method, types::*,
+    Error, error::FieldError, inner_to_map_str_str_method, inner_to_str_method,
+    inner_to_struct_method, inner_to_vec_str_method, inner_to_vec_struct_method, types::*,
 };
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -32,15 +32,7 @@ impl Server {
 
     inner_to_str_method!(auth_user_name, "auth_user_name");
 
-    pub fn config(&self) -> Result<HashMap<String, String>, Error> {
-        serde_json::from_value(
-            self.inner()
-                .get("config")
-                .ok_or_else(|| FieldError::Missing)?
-                .clone(),
-        )
-        .map_err(|_| FieldError::Invalid.into())
-    }
+    inner_to_map_str_str_method!(config, "config");
 
     pub fn environment(&self) -> Result<ServerEnvironment, Error> {
         self.inner()

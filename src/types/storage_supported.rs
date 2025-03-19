@@ -1,5 +1,6 @@
 use crate::{
-    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, types::Storage,
+    Error, error::FieldError, inner_to_bool_method, inner_to_str_method, inner_to_struct_method,
+    types::Storage,
 };
 
 #[derive(Debug)]
@@ -17,13 +18,7 @@ impl StorageSupported {
 
     inner_to_struct_method!(name, "Name", Storage);
 
-    pub fn remote(&self) -> Result<bool, Error> {
-        self.inner()
-            .get("Remote")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_bool()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .into()
-    }
+    inner_to_bool_method!(remote, "Remote");
+
     inner_to_str_method!(version, "Version");
 }

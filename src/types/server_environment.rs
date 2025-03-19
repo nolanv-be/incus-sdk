@@ -1,5 +1,6 @@
 use crate::{
-    Error, error::FieldError, inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
+    Error, error::FieldError, inner_to_bool_method, inner_to_map_str_str_method,
+    inner_to_str_method, inner_to_struct_method, inner_to_u64_method, inner_to_vec_str_method,
     inner_to_vec_struct_method, types::*,
 };
 use serde::Deserialize;
@@ -36,27 +37,11 @@ impl ServerEnvironment {
 
     inner_to_struct_method!(kernel_architecture, "kernel_architecture", Architecture);
 
-    pub fn kernel_features(&self) -> Result<HashMap<String, String>, Error> {
-        serde_json::from_value(
-            self.inner()
-                .get("kernel_features")
-                .ok_or_else(|| FieldError::Missing)?
-                .clone(),
-        )
-        .map_err(|_| FieldError::Invalid.into())
-    }
+    inner_to_map_str_str_method!(kernel_features, "kernel_features");
 
     inner_to_str_method!(kernel_version, "kernel_version");
 
-    pub fn lxc_features(&self) -> Result<HashMap<String, String>, Error> {
-        serde_json::from_value(
-            self.inner()
-                .get("lxc_features")
-                .ok_or_else(|| FieldError::Missing)?
-                .clone(),
-        )
-        .map_err(|_| FieldError::Invalid.into())
-    }
+    inner_to_map_str_str_method!(lxc_features, "lxc_features");
 
     inner_to_str_method!(os_name, "os_name");
 
@@ -64,27 +49,13 @@ impl ServerEnvironment {
 
     inner_to_str_method!(server, "server");
 
-    pub fn server_clustered(&self) -> Result<bool, Error> {
-        self.inner()
-            .get("server_clustered")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_bool()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .into()
-    }
+    inner_to_bool_method!(server_clustered, "server_clustered");
 
     inner_to_struct_method!(server_event_mode, "server_event_mode", ServerEventMode);
 
     inner_to_str_method!(server_name, "server_name");
 
-    pub fn server_pid(&self) -> Result<u64, Error> {
-        self.inner()
-            .get("server_pid")
-            .ok_or_else(|| FieldError::Missing)?
-            .as_u64()
-            .ok_or_else(|| FieldError::Invalid.into())
-            .map(|s| s.into())
-    }
+    inner_to_u64_method!(server_pid, "server_pid");
 
     inner_to_str_method!(server_version, "server_version");
 
