@@ -14,7 +14,7 @@ impl IncusVersion {
         self.0.clone()
     }
     pub fn version(&self) -> Result<String, Error> {
-        self.0
+        self.inner()
             .split_once("/")
             .ok_or_else(|| FieldError::Invalid.into())
             .map(|(_, version)| version.into())
