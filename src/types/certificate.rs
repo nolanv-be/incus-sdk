@@ -1,6 +1,6 @@
 use crate::{
-    Error, error::FieldError, inner_to_bool_method, inner_to_str_method, inner_to_struct_method,
-    inner_to_vec_str_method,
+    Error, error::FieldError, inner_split_get_str_method, inner_to_bool_method,
+    inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
 };
 use serde::{Deserialize, Serialize};
 
@@ -15,40 +15,12 @@ impl CertificateFingerprints {
     pub fn inner(&self) -> serde_json::Value {
         self.0.clone()
     }
-    pub fn fingerprints(&self) -> Result<Vec<String>, Error> {
-        self.inner()
-            .as_array()
-            .ok_or_else(|| FieldError::Invalid)?
-            .iter()
-            .map(|fingerprint| {
-                fingerprint
-                    .as_str()
-                    .ok_or_else(|| FieldError::Invalid)
-                    .map(|s| {
-                        s.split("/")
-                            .last()
-                            .ok_or_else(|| FieldError::Invalid.into())
-                            .map(|f| f.into())
-                    })
-            })
-            .flatten()
-            .collect::<Result<Vec<String>, Error>>()
-    }
+
+    inner_split_get_str_method!(fingerprints, "/", 3);
 }
 
 #[derive(Serialize, Debug)]
-pub struct CertificateFull {
-    pub certificate: String,
-    pub description: String,
-    pub name: String,
-    pub projects: Vec<String>,
-    pub restricted: bool,
-    #[serde(rename = "type")]
-    pub certificate_type: CertificateType,
-}
-
-#[derive(Serialize, Debug)]
-pub struct CertificatePartial {
+pub struct Certificate {
     pub certificate: Option<String>,
     pub description: Option<String>,
     pub name: Option<String>,

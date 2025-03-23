@@ -7,16 +7,24 @@ use serde::Deserialize;
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
-pub struct ServerEnvironment(serde_json::Value);
-impl From<serde_json::Value> for ServerEnvironment {
-    fn from(s: serde_json::Value) -> Self {
-        ServerEnvironment(s)
+pub struct ServerEnvironment(serde_json::value::Map<String, serde_json::Value>);
+impl TryFrom<&Server> for ServerEnvironment {
+    type Error = crate::Error;
+
+    fn try_from(server: &Server) -> Result<Self, Self::Error> {
+        server
+            .inner()
+            .get("environment")
+            .ok_or_else(|| FieldError::Missing)?
+            .as_object()
+            .ok_or_else(|| FieldError::Invalid.into())
+            .map(|m| ServerEnvironment(m.clone()))
     }
 }
 
 impl ServerEnvironment {
-    pub fn inner(&self) -> serde_json::Value {
-        self.0.clone()
+    pub fn inner<'a>(&'a self) -> &'a serde_json::value::Map<String, serde_json::Value> {
+        &self.0
     }
 
     inner_to_vec_str_method!(addresses, "addresses");

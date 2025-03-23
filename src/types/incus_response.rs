@@ -2,7 +2,7 @@ use crate::{Error, error::FieldError, inner_to_struct_method};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct IncusResponse(serde_json::Value);
+pub struct IncusResponse(pub serde_json::Value);
 impl From<serde_json::Value> for IncusResponse {
     fn from(s: serde_json::Value) -> Self {
         IncusResponse(s)
@@ -10,12 +10,8 @@ impl From<serde_json::Value> for IncusResponse {
 }
 
 impl IncusResponse {
-    pub fn inner(&self) -> serde_json::Value {
-        self.0.clone()
-    }
-
     pub fn status(&self) -> Result<IncusResponseStatus, Error> {
-        self.inner()
+        self.0
             .get("status_code")
             .ok_or_else(|| FieldError::Missing)?
             .as_u64()
@@ -25,11 +21,11 @@ impl IncusResponse {
 
     inner_to_struct_method!(response_type, "type", IncusResponseType);
 
-    pub fn data<DATA: From<serde_json::Value>>(&self) -> Result<DATA, Error> {
-        self.inner()
+    pub fn metadata(&self) -> Result<&serde_json::Value, Error> {
+        self.0
             .get("metadata")
             .ok_or_else(|| FieldError::Missing.into())
-            .map(|e| e.clone().into())
+            .map(|m| m)
     }
 }
 

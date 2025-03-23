@@ -28,7 +28,7 @@ macro_rules! inner_to_u64_method {
 macro_rules! inner_to_str_method {
     ($method:ident, $field:expr) => {
         pub fn $method(&self) -> Result<String, Error> {
-            self.inner()
+            self.0
                 .get($field)
                 .ok_or_else(|| FieldError::Missing)?
                 .as_str()
@@ -42,7 +42,7 @@ macro_rules! inner_to_str_method {
 macro_rules! inner_to_vec_str_method {
     ($method:ident, $field:expr) => {
         pub fn $method(&self) -> Result<Vec<String>, Error> {
-            self.inner()
+            self.0
                 .get($field)
                 .ok_or_else(|| FieldError::Missing)?
                 .as_array()
@@ -63,7 +63,7 @@ macro_rules! inner_to_map_str_str_method {
     ($method:ident, $field:expr) => {
         pub fn $method(&self) -> Result<HashMap<String, String>, Error> {
             serde_json::from_value(
-                self.inner()
+                self.0
                     .get($field)
                     .ok_or_else(|| FieldError::Missing)?
                     .clone(),
@@ -77,7 +77,7 @@ macro_rules! inner_to_map_str_str_method {
 macro_rules! inner_to_struct_method {
     ($method:ident, $field:expr, $output:ident) => {
         pub fn $method(&self) -> Result<$output, Error> {
-            self.inner()
+            self.0
                 .get($field)
                 .ok_or_else(|| FieldError::Missing)?
                 .as_str()
@@ -91,7 +91,7 @@ macro_rules! inner_to_struct_method {
 macro_rules! inner_to_vec_struct_method {
     ($method:ident, $field:expr, $output:ident) => {
         pub fn $method(&self) -> Result<Vec<$output>, Error> {
-            self.inner()
+            self.0
                 .get($field)
                 .ok_or_else(|| FieldError::Missing)?
                 .as_array()
@@ -105,6 +105,44 @@ macro_rules! inner_to_vec_struct_method {
                 })
                 .flatten()
                 .collect::<Result<Vec<$output>, Error>>()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! inner_split_get_str_method {
+    ($method:ident, $separator:expr, $nth:expr) => {
+        pub fn $method(&self) -> Result<Vec<String>, Error> {
+            self.inner()
+                .as_array()
+                .ok_or_else(|| FieldError::Invalid)?
+                .iter()
+                .map(|fingerprint| {
+                    fingerprint
+                        .as_str()
+                        .ok_or_else(|| FieldError::Invalid)
+                        .map(|s| {
+                            s.split($separator)
+                                .nth($nth)
+                                .ok_or_else(|| FieldError::Invalid.into())
+                                .map(|f| f.into())
+                        })
+                })
+                .flatten()
+                .collect::<Result<Vec<String>, Error>>()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! with_method {
+    ($method:ident, $parameter:ident, $parameter_type:ty, $field:expr) => {
+        pub fn $method(&mut self, $parameter: $parameter_type) -> Result<&mut Self, Error> {
+            self.inner_mut().insert(
+                $field.into(),
+                serde_json::to_value($parameter).map_err(|_| FieldError::Invalid)?,
+            );
+            Ok(self)
         }
     };
 }

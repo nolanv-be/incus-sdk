@@ -32,9 +32,9 @@ impl IncusClient {
 
     pub async fn post_certificate(
         &mut self,
-        certificate: &CertificateFull,
+        certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<CertificateFull, serde_json::Value>(
+        self.send_request_incus::<Certificate, serde_json::Value>(
             "/certificates",
             Method::POST,
             &[],
@@ -47,9 +47,9 @@ impl IncusClient {
     pub async fn patch_certificate(
         &mut self,
         fingerprint: &str,
-        certificate: &CertificatePartial,
+        certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<CertificatePartial, serde_json::Value>(
+        self.send_request_incus::<Certificate, serde_json::Value>(
             &format!("/certificates/{fingerprint}"),
             Method::PATCH,
             &[],
@@ -62,9 +62,9 @@ impl IncusClient {
     pub async fn put_certificate(
         &mut self,
         fingerprint: &str,
-        certificate: &CertificateFull,
+        certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<CertificateFull, serde_json::Value>(
+        self.send_request_incus::<Certificate, serde_json::Value>(
             &format!("/certificates/{fingerprint}"),
             Method::PUT,
             &[],
