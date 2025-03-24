@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use crate::types::*;
+use crate::{Error, error::FieldError, inner_split_get_str_method};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-
-use crate::{Error, error::FieldError, inner_split_get_str_method};
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug, PartialEq, Eq)]
 pub struct ImageFingerprints(serde_json::Value);

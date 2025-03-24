@@ -1,10 +1,10 @@
 use crate::{
-    Error, error::FieldError, inner_split_get_str_method, inner_to_bool_method,
-    inner_to_str_method, inner_to_struct_method, inner_to_vec_str_method,
+    Error, error::FieldError, inner_split_get_str_method, inner_str_to_struct_method,
+    inner_to_bool_method, inner_to_str_method, inner_to_vec_str_method,
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct CertificateFingerprints(serde_json::Value);
 impl From<serde_json::Value> for CertificateFingerprints {
     fn from(f: serde_json::Value) -> Self {
@@ -57,7 +57,7 @@ impl CertificateReturned {
 
     inner_to_bool_method!(restricted, "restricted");
 
-    inner_to_struct_method!(certificate_type, "type", CertificateType);
+    inner_str_to_struct_method!(certificate_type, "type", CertificateType);
 }
 
 #[derive(Serialize, Debug)]

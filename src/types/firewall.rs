@@ -1,6 +1,7 @@
 use crate::error::FieldError;
+use serde::Serialize;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 pub enum Firewall {
     Nftables,
     Xtables,

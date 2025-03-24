@@ -1,6 +1,7 @@
 use crate::error::FieldError;
+use serde::Serialize;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize)]
 pub enum Architecture {
     I686,
     X86_64,
