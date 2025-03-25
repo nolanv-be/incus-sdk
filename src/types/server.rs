@@ -9,7 +9,7 @@ impl TryFrom<&IncusResponse> for Server {
         response
             .metadata()?
             .as_object()
-            .ok_or_else(|| crate::error::FieldError::Invalid.into())
+            .ok_or(crate::error::FieldError::Invalid.into())
             .map(|m| Server(m.clone()))
     }
 }

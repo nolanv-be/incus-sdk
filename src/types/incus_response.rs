@@ -12,25 +12,25 @@ impl IncusResponse {
     pub fn status(&self) -> Result<IncusResponseStatus, Error> {
         self.0
             .get("status_code")
-            .ok_or_else(|| FieldError::Missing)?
+            .ok_or(FieldError::Missing)?
             .as_u64()
-            .ok_or_else(|| FieldError::Invalid)?
+            .ok_or(FieldError::Invalid)?
             .try_into()
     }
 
     pub fn response_type(&self) -> Result<IncusResponseType, Error> {
         self.0
             .get("type")
-            .ok_or_else(|| FieldError::Missing)?
+            .ok_or(FieldError::Missing)?
             .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
+            .ok_or(FieldError::Invalid)?
             .try_into()
     }
 
     pub fn metadata(&self) -> Result<&serde_json::Value, Error> {
         self.0
             .get("metadata")
-            .ok_or_else(|| FieldError::Missing.into())
+            .ok_or(FieldError::Missing.into())
             .map(|m| m)
     }
 }
@@ -119,18 +119,18 @@ impl IncusResponseError {
     pub fn status(&self) -> Result<IncusResponseErrorKind, Error> {
         self.inner()
             .get("error_code")
-            .ok_or_else(|| FieldError::Missing)?
+            .ok_or(FieldError::Missing)?
             .as_u64()
-            .ok_or_else(|| FieldError::Invalid)?
+            .ok_or(FieldError::Invalid)?
             .try_into()
     }
 
     pub fn response_type(&self) -> Result<IncusResponseType, Error> {
         self.0
             .get("type")
-            .ok_or_else(|| FieldError::Missing)?
+            .ok_or(FieldError::Missing)?
             .as_str()
-            .ok_or_else(|| FieldError::Invalid)?
+            .ok_or(FieldError::Invalid)?
             .try_into()
     }
 }

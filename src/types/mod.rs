@@ -151,7 +151,7 @@ pub fn get_unprefixed_string(value: &serde_json::Value, prefix: &str) -> Result<
         .as_str()
         .ok_or(FieldError::Invalid)?
         .strip_prefix(prefix)
-        .ok_or_else(|| crate::error::FieldError::Invalid.into())
+        .ok_or(crate::error::FieldError::Invalid.into())
         .map(|version| version.into())
 }
 
