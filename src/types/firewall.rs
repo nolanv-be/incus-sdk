@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum Firewall {
     Nftables,
     Xtables,
@@ -13,7 +10,7 @@ impl TryFrom<&str> for Firewall {
         match firewall {
             "nftables" => Ok(Firewall::Nftables),
             "xtables" => Ok(Firewall::Xtables),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

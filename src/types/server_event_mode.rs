@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum ServerEventMode {
     FullMesh,
     HubServer,
@@ -15,7 +12,7 @@ impl TryFrom<&str> for ServerEventMode {
             "full-mesh" => Ok(ServerEventMode::FullMesh),
             "hub-server" => Ok(ServerEventMode::HubServer),
             "hub-client" => Ok(ServerEventMode::HubClient),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

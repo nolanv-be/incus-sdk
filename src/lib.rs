@@ -1,7 +1,7 @@
 mod endpoints;
 pub mod error;
+pub mod macros;
 pub mod types;
-pub mod utils;
 
 pub use error::Error;
 use http_client_unix_domain_socket::{ClientUnix, ErrorAndResponseJson, Method};

@@ -1,7 +1,6 @@
-use crate::{Error, error::FieldError, inner_str_to_struct_method};
-use serde::Deserialize;
+use crate::{Error, error::FieldError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct IncusResponse(pub serde_json::Value);
 impl From<serde_json::Value> for IncusResponse {
     fn from(s: serde_json::Value) -> Self {
@@ -104,7 +103,7 @@ impl TryFrom<u64> for IncusResponseStatus {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct IncusResponseError(serde_json::Value);
 impl From<serde_json::Value> for IncusResponseError {
     fn from(s: serde_json::Value) -> Self {

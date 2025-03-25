@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum ApiStatus {
     Devel,
     Stable,
@@ -15,7 +12,7 @@ impl TryFrom<&str> for ApiStatus {
             "devel" => Ok(ApiStatus::Devel),
             "stable" => Ok(ApiStatus::Stable),
             "deprecated" => Ok(ApiStatus::Deprecated),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

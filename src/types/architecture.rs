@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, PartialEq, Eq, Serialize)]
+#[derive(Debug, PartialEq, Eq, serde::Serialize)]
 pub enum Architecture {
     I686,
     X86_64,
@@ -39,7 +36,7 @@ impl TryFrom<&str> for Architecture {
             "riscv32" => Ok(Architecture::Riscv32),
             "riscv64" => Ok(Architecture::Riscv64),
             "loongarch64" => Ok(Architecture::Loongarch64),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

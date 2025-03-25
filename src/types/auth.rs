@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum Auth {
     Trusted,
     Untrusted,
@@ -13,7 +10,7 @@ impl TryFrom<&str> for Auth {
         match auth {
             "trusted" => Ok(Auth::Trusted),
             "untrusted" => Ok(Auth::Untrusted),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

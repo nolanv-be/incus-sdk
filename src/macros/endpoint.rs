@@ -1,4 +1,3 @@
-#[macro_export]
 macro_rules! build_query {
     ($($param:ident),*) => {{
         let mut queries = Vec::new();
@@ -15,3 +14,5 @@ macro_rules! build_query {
         query_string
     }};
 }
+
+pub(crate) use build_query;

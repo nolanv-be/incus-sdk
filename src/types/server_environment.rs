@@ -1,8 +1,6 @@
-use crate::{error::FieldError, types::*, *};
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use crate::{macros::*, types::*};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct ServerEnvironment(serde_json::value::Map<String, serde_json::Value>);
 impl From<&serde_json::value::Map<String, serde_json::Value>> for ServerEnvironment {
     fn from(value: &serde_json::value::Map<String, serde_json::Value>) -> Self {
@@ -11,75 +9,75 @@ impl From<&serde_json::value::Map<String, serde_json::Value>> for ServerEnvironm
 }
 
 impl ServerEnvironment {
-    inner_method!(inner, inner_mut);
+    get_set_inner!(inner, inner_mut);
 
-    inner_to_vec_str_method!(addresses, with_addresses, "addresses");
+    get_set_vec_str!(addresses, with_addresses, "addresses");
 
-    inner_array_str_to_vec_struct_method!(
+    get_set_array_str_to_vec_struct!(
         architectures,
         with_architectures,
         "architectures",
         Architecture
     );
 
-    inner_to_str_method!(certificate, with_certificate, "certificate");
+    get_set_string!(certificate, with_certificate, "certificate");
 
-    inner_to_str_method!(
+    get_set_string!(
         certificate_fingerprint,
         with_certificate_fingerprint,
         "certificate_fingerprint"
     );
 
-    inner_array_str_to_vec_struct_method!(driver, with_driver, "driver", Driver);
+    get_set_array_str_to_vec_struct!(driver, with_driver, "driver", Driver);
 
-    inner_to_str_method!(driver_version, with_driver_version, "driver_version");
+    get_set_string!(driver_version, with_driver_version, "driver_version");
 
-    inner_str_to_struct_method!(firewall, with_firewall, "firewall", Firewall);
+    get_set_struct_from_string!(firewall, with_firewall, "firewall", Firewall);
 
-    inner_to_str_method!(kernel, with_kernel, "kernel");
+    get_set_string!(kernel, with_kernel, "kernel");
 
-    inner_str_to_struct_method!(
+    get_set_struct_from_string!(
         kernel_architecture,
         with_kernel_architecture,
         "kernel_architecture",
         Architecture
     );
 
-    inner_to_map_str_str_method!(kernel_features, with_kernel_features, "kernel_features");
+    get_set_map_string_string!(kernel_features, with_kernel_features, "kernel_features");
 
-    inner_to_str_method!(kernel_version, with_kernel_version, "kernel_version");
+    get_set_string!(kernel_version, with_kernel_version, "kernel_version");
 
-    inner_to_map_str_str_method!(lxc_features, with_lxc_features, "lxc_features");
+    get_set_map_string_string!(lxc_features, with_lxc_features, "lxc_features");
 
-    inner_to_str_method!(os_name, with_os_name, "os_name");
+    get_set_string!(os_name, with_os_name, "os_name");
 
-    inner_to_str_method!(project, with_project, "project");
+    get_set_string!(project, with_project, "project");
 
-    inner_to_str_method!(server, with_server, "server");
+    get_set_string!(server, with_server, "server");
 
-    inner_to_bool_method!(server_clustered, with_server_clustered, "server_clustered");
+    get_set_bool!(server_clustered, with_server_clustered, "server_clustered");
 
-    inner_str_to_struct_method!(
+    get_set_struct_from_string!(
         server_event_mode,
         with_server_event_mode,
         "server_event_mode",
         ServerEventMode
     );
 
-    inner_to_str_method!(server_name, with_server_name, "server_name");
+    get_set_string!(server_name, with_server_name, "server_name");
 
-    inner_to_u64_method!(server_pid, with_server_pid, "server_pid");
+    get_set_u64!(server_pid, with_server_pid, "server_pid");
 
-    inner_to_str_method!(server_version, with_server_version, "server_version");
+    get_set_string!(server_version, with_server_version, "server_version");
 
-    inner_str_to_struct_method!(storage, with_storage, "storage", Storage);
+    get_set_struct_from_string!(storage, with_storage, "storage", Storage);
 
-    inner_array_object_to_vec_struct_method!(
+    get_set_vec_struct!(
         storage_supported_drivers,
         with_storage_supported_drivers,
         "storage_supported_drivers",
         StorageSupported
     );
 
-    inner_to_str_method!(storage_version, with_storage_version, "storage_version");
+    get_set_string!(storage_version, with_storage_version, "storage_version");
 }

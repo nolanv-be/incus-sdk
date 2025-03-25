@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum Storage {
     Btrfs,
     Ceph,
@@ -25,7 +22,7 @@ impl TryFrom<&str> for Storage {
             "lvm" => Ok(Storage::Lvm),
             "lvmcluster" => Ok(Storage::Lvmcluster),
             "zfs" => Ok(Storage::Zfs),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

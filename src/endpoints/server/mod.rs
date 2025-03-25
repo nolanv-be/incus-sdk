@@ -1,5 +1,5 @@
 // TODO get /1.0/events websocket ?
-use crate::{Error, IncusClient, build_query, error::FieldError, types::*};
+use crate::{Error, IncusClient, error::FieldError, macros::build_query, types::*};
 use http_client_unix_domain_socket::{ErrorAndResponseJson, Method};
 
 impl IncusClient {
