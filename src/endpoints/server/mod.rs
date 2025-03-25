@@ -1,32 +1,13 @@
 // TODO get /1.0/events websocket ?
-use crate::{Error, IncusClient, error::FieldError, macros::build_query, types::*};
-use http_client_unix_domain_socket::{ErrorAndResponseJson, Method};
+use crate::{Error, IncusClient, macros::build_query, types::*};
+use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
     pub async fn get_supported_versions(&mut self) -> Result<Vec<IncusVersion>, Error> {
-        match self
-            .client
-            .send_request_json::<(), serde_json::Value, IncusResponseError>(
-                "/",
-                Method::GET,
-                &vec![("Host", "localhost")],
-                None,
-            )
-            .await
-        {
-            Ok((_, response)) => response
-                .get("metadata")
-                .ok_or(FieldError::Missing)?
-                .as_array()
-                .ok_or(FieldError::Invalid)?
-                .iter()
-                .map(|v| Ok(v.into()))
-                .collect(),
-            Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
-                Err(Error::Http(response))
-            }
-            Err(ErrorAndResponseJson::InternalError(e)) => Err(e.into()),
-        }
+        (&self
+            .send_request_incus_raw::<()>("/", Method::GET, &[], None)
+            .await?)
+            .try_into()
     }
 
     pub async fn get_server(

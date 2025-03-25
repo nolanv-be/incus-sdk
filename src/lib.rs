@@ -30,6 +30,22 @@ impl IncusClient {
         headers: &[(&str, &str)],
         body_request: Option<&IN>,
     ) -> Result<IncusResponse, Error> {
+        self.send_request_incus_raw(
+            &format!("/{}{}", self.version, endpoint),
+            method,
+            headers,
+            body_request,
+        )
+        .await
+    }
+
+    async fn send_request_incus_raw<IN: Serialize>(
+        &mut self,
+        endpoint: &str,
+        method: Method,
+        headers: &[(&str, &str)],
+        body_request: Option<&IN>,
+    ) -> Result<IncusResponse, Error> {
         let mut headers_concat = vec![("Host", "localhost")];
         for header in headers {
             headers_concat.push(header.clone());
@@ -38,7 +54,7 @@ impl IncusClient {
         match self
             .client
             .send_request_json::<IN, serde_json::Value, IncusResponseError>(
-                &format!("/{}{}", self.version, endpoint),
+                endpoint,
                 method,
                 &headers_concat,
                 body_request,
