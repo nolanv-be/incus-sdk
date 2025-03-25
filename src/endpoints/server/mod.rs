@@ -16,15 +16,11 @@ impl IncusClient {
         {
             Ok((_, response)) => response
                 .get("metadata")
-                .ok_or_else(|| FieldError::Missing)?
+                .ok_or(FieldError::Missing)?
                 .as_array()
-                .ok_or_else(|| FieldError::Invalid)?
+                .ok_or(FieldError::Invalid)?
                 .iter()
-                .map(|v| {
-                    v.as_str()
-                        .ok_or_else(|| FieldError::Invalid.into())
-                        .map(|s| s.into())
-                })
+                .map(|v| Ok(v.into()))
                 .collect(),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
                 Err(Error::Http(response))

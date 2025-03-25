@@ -107,7 +107,16 @@ macro_rules! set_map {
 }
 pub(crate) use set_map;
 
-macro_rules! get_set_inner {
+macro_rules! get_unprefixed_string {
+    ($method:ident, $prefix:expr) => {
+        pub fn $method(&self) -> Result<String, $crate::Error> {
+            $crate::types::get_unprefixed_string(self.inner(), $prefix)
+        }
+    };
+}
+pub(crate) use get_unprefixed_string;
+
+macro_rules! get_set_inner_map {
     ($method:ident, $method_mut:ident) => {
         pub fn $method<'a>(&'a self) -> &'a serde_json::value::Map<String, serde_json::Value> {
             &self.0
@@ -119,4 +128,16 @@ macro_rules! get_set_inner {
         }
     };
 }
-pub(crate) use get_set_inner;
+pub(crate) use get_set_inner_map;
+
+macro_rules! get_set_inner_value {
+    ($method:ident, $method_mut:ident) => {
+        pub fn $method<'a>(&'a self) -> &'a serde_json::Value {
+            &self.0
+        }
+        pub fn $method_mut<'a>(&'a mut self) -> &'a mut serde_json::Value {
+            &mut self.0
+        }
+    };
+}
+pub(crate) use get_set_inner_value;

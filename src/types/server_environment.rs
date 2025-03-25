@@ -9,7 +9,7 @@ impl From<&serde_json::value::Map<String, serde_json::Value>> for ServerEnvironm
 }
 
 impl ServerEnvironment {
-    get_set_inner!(inner, inner_mut);
+    get_set_inner_map!(inner, inner_mut);
 
     get_set_vec_str!(addresses, with_addresses, "addresses");
 

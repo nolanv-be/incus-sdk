@@ -1,19 +1,14 @@
+use crate::macros::*;
+
 #[derive(serde::Deserialize, Debug, PartialEq, Eq)]
-pub struct IncusVersion(String);
-impl From<&str> for IncusVersion {
-    fn from(v: &str) -> Self {
-        IncusVersion(v.into())
+pub struct IncusVersion(serde_json::Value);
+impl From<&serde_json::Value> for IncusVersion {
+    fn from(v: &serde_json::Value) -> Self {
+        IncusVersion(v.clone())
     }
 }
 impl IncusVersion {
-    pub fn inner(&self) -> String {
-        self.0.clone()
-    }
-    pub fn version(&self) -> Result<String, crate::Error> {
-        self.inner()
-            .split("/")
-            .nth(1)
-            .ok_or_else(|| crate::error::FieldError::Invalid.into())
-            .map(|version| version.into())
-    }
+    get_set_inner_value!(inner, inner_mut);
+
+    get_unprefixed_string!(version, "/");
 }

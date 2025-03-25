@@ -9,7 +9,7 @@ impl From<&serde_json::value::Map<String, serde_json::Value>> for StorageSupport
 }
 
 impl StorageSupported {
-    get_set_inner!(inner, inner_mut);
+    get_set_inner_map!(inner, inner_mut);
 
     get_set_struct_from_string!(name, with_name, "Name", Storage);
 

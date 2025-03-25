@@ -146,6 +146,15 @@ pub fn get_vec_struct<OUT: for<'a> From<&'a serde_json::Map<String, serde_json::
         .collect::<Result<Vec<OUT>, Error>>()
 }
 
+pub fn get_unprefixed_string(value: &serde_json::Value, prefix: &str) -> Result<String, Error> {
+    value
+        .as_str()
+        .ok_or(FieldError::Invalid)?
+        .strip_prefix(prefix)
+        .ok_or_else(|| crate::error::FieldError::Invalid.into())
+        .map(|version| version.into())
+}
+
 pub fn insert_in_map<V: serde::Serialize>(
     map: &mut serde_json::Map<String, serde_json::Value>,
     key: &str,

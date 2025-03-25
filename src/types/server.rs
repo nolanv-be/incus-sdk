@@ -15,7 +15,7 @@ impl TryFrom<&IncusResponse> for Server {
 }
 
 impl Server {
-    get_set_inner!(inner, inner_mut);
+    get_set_inner_map!(inner, inner_mut);
 
     get_set_vec_str!(api_extensions, with_api_extensions, "api_extensions");
 
