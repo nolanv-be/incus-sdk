@@ -2,6 +2,7 @@ mod endpoints;
 pub mod error;
 pub mod macros;
 pub mod types;
+pub mod utils;
 
 pub use error::Error;
 use http_client_unix_domain_socket::{ClientUnix, ErrorAndResponseJson, Method};
@@ -61,7 +62,7 @@ impl IncusClient {
             )
             .await
         {
-            Ok((_, response)) => Ok(response.into()),
+            Ok((_, response)) => response.try_into(),
             Err(ErrorAndResponseJson::ResponseUnsuccessful(_, response)) => {
                 Err(Error::Http(response))
             }
@@ -87,14 +88,18 @@ mod tests {
             .await
             .expect("IncusSdk::try_default");
 
-        let version = incus
+        let supported_versions = incus
             .get_supported_versions()
             .await
             .expect("incus.get_supported_versions");
 
         assert_eq!(
-            version.first().expect("first").version().expect("version"),
-            "1.0"
+            supported_versions
+                .versions()
+                .expect("versions")
+                .first()
+                .expect("first"),
+            &"1.0"
         );
     }
 
@@ -144,10 +149,7 @@ mod tests {
             vec![Architecture::X86_64, Architecture::I686]
         );
 
-        assert_eq!(
-            server.inner().get("api_version").map(|v| v.as_str()),
-            Some(Some("1.0"))
-        );
+        assert_eq!(server.api_version().expect("api_version"), "1.0");
     }
     #[tokio::test]
     async fn get_resources() {

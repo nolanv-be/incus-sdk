@@ -1,37 +1,26 @@
-use crate::{Error, error::FieldError};
+use crate::{Error, error::FieldError, types::*};
 
 #[derive(Debug, serde::Deserialize)]
-pub struct IncusResponse(pub serde_json::Value);
-impl From<serde_json::Value> for IncusResponse {
-    fn from(s: serde_json::Value) -> Self {
-        IncusResponse(s)
+pub struct IncusResponse(JsonWrapperMap);
+impl TryFrom<serde_json::Value> for IncusResponse {
+    type Error = crate::Error;
+
+    fn try_from(json: serde_json::Value) -> Result<Self, Self::Error> {
+        Ok(IncusResponse(json.try_into()?))
     }
 }
 
 impl IncusResponse {
     pub fn status(&self) -> Result<IncusResponseStatus, Error> {
-        self.0
-            .get("status_code")
-            .ok_or(FieldError::Missing)?
-            .as_u64()
-            .ok_or(FieldError::Invalid)?
-            .try_into()
+        self.0.get_u64("status_code")?.try_into()
     }
 
     pub fn response_type(&self) -> Result<IncusResponseType, Error> {
-        self.0
-            .get("type")
-            .ok_or(FieldError::Missing)?
-            .as_str()
-            .ok_or(FieldError::Invalid)?
-            .try_into()
+        self.0.get_str("type")?.try_into()
     }
 
     pub fn metadata(&self) -> Result<&serde_json::Value, Error> {
-        self.0
-            .get("metadata")
-            .ok_or(FieldError::Missing.into())
-            .map(|m| m)
+        self.0.get_json_value("metadata")
     }
 }
 

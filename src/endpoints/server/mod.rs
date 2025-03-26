@@ -3,11 +3,12 @@ use crate::{Error, IncusClient, macros::build_query, types::*};
 use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
-    pub async fn get_supported_versions(&mut self) -> Result<Vec<IncusVersion>, Error> {
-        (&self
+    pub async fn get_supported_versions(&mut self) -> Result<IncusVersionSupported, Error> {
+        Ok((&self
             .send_request_incus_raw::<()>("/", Method::GET, &[], None)
             .await?)
-            .try_into()
+            .metadata()?
+            .into())
     }
 
     pub async fn get_server(
@@ -23,6 +24,7 @@ impl IncusClient {
                 None,
             )
             .await?)
+            .metadata()?
             .try_into()
     }
 

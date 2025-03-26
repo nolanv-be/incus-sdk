@@ -1,7 +1,7 @@
 macro_rules! get_set_bool {
     ($name_rust:ident, $setter:ident, $name_json:expr) => {
         pub fn $name_rust(&self) -> Result<bool, $crate::Error> {
-            $crate::types::get_bool(self.inner(), $name_json)
+            self.0.get_bool($name_json)
         }
 
         set_map!($setter, $name_rust, bool, $name_json);
@@ -12,7 +12,7 @@ pub(crate) use get_set_bool;
 macro_rules! get_set_u64 {
     ($name_rust:ident, $setter:ident, $name_json:expr) => {
         pub fn $name_rust(&self) -> Result<u64, $crate::Error> {
-            $crate::types::get_u64(self.inner(), $name_json)
+            self.0.get_u64($name_json)
         }
 
         set_map!($setter, $name_rust, u64, $name_json);
@@ -20,32 +20,32 @@ macro_rules! get_set_u64 {
 }
 pub(crate) use get_set_u64;
 
-macro_rules! get_set_string {
+macro_rules! get_set_str {
     ($name_rust:ident, $setter:ident, $name_json:expr) => {
-        pub fn $name_rust(&self) -> Result<String, $crate::Error> {
-            $crate::types::get_string(self.inner(), $name_json)
+        pub fn $name_rust(&self) -> Result<&str, $crate::Error> {
+            self.0.get_str($name_json)
         }
 
         set_map!($setter, $name_rust, String, $name_json);
     };
 }
-pub(crate) use get_set_string;
+pub(crate) use get_set_str;
 
-macro_rules! get_set_vec_str {
+macro_rules! get_set_strs {
     ($name_rust:ident, $setter:ident, $name_json:expr) => {
-        pub fn $name_rust(&self) -> Result<Vec<String>, $crate::Error> {
-            $crate::types::get_vec_string(self.inner(), $name_json)
+        pub fn $name_rust(&self) -> Result<Vec<&str>, $crate::Error> {
+            self.0.get_strs($name_json)
         }
 
         set_map!($setter, $name_rust, Vec<String>, $name_json);
     };
 }
-pub(crate) use get_set_vec_str;
+pub(crate) use get_set_strs;
 
 macro_rules! get_set_map_string_string {
     ($name_rust:ident, $setter:ident, $name_json:expr) => {
         pub fn $name_rust(&self) -> Result<std::collections::HashMap<String, String>, $crate::Error> {
-            $crate::types::get_map_string_string(self.inner(), $name_json)
+            self.0.get_map_string_string($name_json)
         }
 
         set_map!($setter, $name_rust,std::collections::HashMap<String, String>, $name_json);
@@ -53,91 +53,77 @@ macro_rules! get_set_map_string_string {
 }
 pub(crate) use get_set_map_string_string;
 
-macro_rules! get_set_struct_from_string {
+macro_rules! get_set_struct_from_str {
     ($name_rust:ident, $setter:ident, $name_json:expr, $output:ident) => {
         pub fn $name_rust(&self) -> Result<$output, $crate::Error> {
-            $crate::types::get_struct_from_string(self.inner(), $name_json)
+            self.0.get_str($name_json)?.try_into()
         }
 
         set_map!($setter, $name_rust, $output, $name_json);
     };
 }
-pub(crate) use get_set_struct_from_string;
+pub(crate) use get_set_struct_from_str;
 
-macro_rules! get_set_struct {
+macro_rules! get_set_struct_from_json_value {
     ($name_rust:ident, $setter:ident, $name_json:expr, $output:ident) => {
         pub fn $name_rust(&self) -> Result<$output, $crate::Error> {
-            $crate::types::get_struct(self.inner(), $name_json)
+            self.0.get_json_value($name_json)?.try_into()
         }
 
         set_map!($setter, $name_rust, $output, $name_json);
     };
 }
-pub(crate) use get_set_struct;
+pub(crate) use get_set_struct_from_json_value;
 
-macro_rules! get_set_array_str_to_vec_struct {
+macro_rules! get_set_structs_from_strs {
     ($name_rust:ident, $setter:ident, $name_json:expr, $output:ident) => {
         pub fn $name_rust(&self) -> Result<Vec<$output>, $crate::Error> {
-            $crate::types::get_vec_struct_from_array_string(self.inner(), $name_json)
+            self.0
+                .get_strs($name_json)?
+                .into_iter()
+                .map(|i| i.try_into())
+                .collect()
         }
 
         set_map!($setter, $name_rust, Vec<$output>, $name_json);
     };
 }
-pub(crate) use get_set_array_str_to_vec_struct;
+pub(crate) use get_set_structs_from_strs;
 
-macro_rules! get_set_vec_struct {
+macro_rules! get_set_structs_from_json_values {
     ($name_rust:ident, $setter:ident, $name_json:expr, $output:ident) => {
         pub fn $name_rust(&self) -> Result<Vec<$output>, $crate::Error> {
-            $crate::types::get_vec_struct(self.inner(), $name_json)
+            self.0
+                .get_json_values($name_json)?
+                .into_iter()
+                .map(|i| i.try_into())
+                .collect()
         }
 
         set_map!($setter, $name_rust, Vec<$output>, $name_json);
     };
 }
-pub(crate) use get_set_vec_struct;
+pub(crate) use get_set_structs_from_json_values;
 
 macro_rules! set_map {
     ($method:ident, $parameter:ident, $parameter_type:ty, $name_json:expr) => {
         pub fn $method(&mut self, $parameter: $parameter_type) -> Result<&mut Self, $crate::Error> {
-            $crate::types::insert_in_map(self.inner_mut(), $name_json, $parameter)?;
+            self.0.insert_in_map($name_json, $parameter)?;
             Ok(self)
         }
     };
 }
 pub(crate) use set_map;
 
-macro_rules! get_unprefixed_string {
+macro_rules! get_unprefixed_strs {
     ($method:ident, $prefix:expr) => {
-        pub fn $method(&self) -> Result<String, $crate::Error> {
-            $crate::types::get_unprefixed_string(self.inner(), $prefix)
+        pub fn $method(&self) -> Result<Vec<&str>, $crate::Error> {
+            self.0
+                .as_strs()?
+                .into_iter()
+                .map(|s| $crate::utils::get_unprefixed_string(s, $prefix))
+                .collect()
         }
     };
 }
-pub(crate) use get_unprefixed_string;
-
-macro_rules! get_set_inner_map {
-    ($method:ident, $method_mut:ident) => {
-        pub fn $method<'a>(&'a self) -> &'a serde_json::value::Map<String, serde_json::Value> {
-            &self.0
-        }
-        pub fn $method_mut<'a>(
-            &'a mut self,
-        ) -> &'a mut serde_json::value::Map<String, serde_json::Value> {
-            &mut self.0
-        }
-    };
-}
-pub(crate) use get_set_inner_map;
-
-macro_rules! get_set_inner_value {
-    ($method:ident, $method_mut:ident) => {
-        pub fn $method<'a>(&'a self) -> &'a serde_json::Value {
-            &self.0
-        }
-        pub fn $method_mut<'a>(&'a mut self) -> &'a mut serde_json::Value {
-            &mut self.0
-        }
-    };
-}
-pub(crate) use get_set_inner_value;
+pub(crate) use get_unprefixed_strs;
