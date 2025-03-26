@@ -11,26 +11,43 @@ impl TryFrom<&serde_json::Value> for Server {
 }
 
 impl Server {
-    get_set_strs!(api_extensions, with_api_extensions, "api_extensions");
+    get_set_json!(
+        api_extensions,
+        with_api_extensions,
+        "api_extensions",
+        Vec<&str>
+    );
 
-    get_set_struct_from_str!(api_status, with_api_status, "api_status", ApiStatus);
+    get_set_json!(api_status, with_api_status, "api_status", &str, ApiStatus);
 
-    get_set_str!(api_version, with_api_version, "api_version");
+    get_set_json!(api_version, with_api_version, "api_version", &str);
 
-    get_set_struct_from_str!(auth, with_auth, "auth", Auth);
+    get_set_json!(auth, with_auth, "auth", &str, Auth);
 
-    get_set_structs_from_strs!(auth_methods, with_auth_methods, "auth_methods", AuthMethod);
+    get_set_json!(
+        auth_methods,
+        with_auth_methods,
+        "auth_methods",
+        Vec<&str>,
+        AuthMethod
+    );
 
-    get_set_str!(auth_user_method, with_auth_user_method, "auth_user_method");
+    get_set_json!(
+        auth_user_method,
+        with_auth_user_method,
+        "auth_user_method",
+        &str
+    );
 
-    get_set_str!(auth_user_name, with_auth_user_name, "auth_user_name");
+    get_set_json!(auth_user_name, with_auth_user_name, "auth_user_name", &str);
 
-    get_set_map_string_string!(config, with_config, "config");
+    get_set_json!(config, with_config, "config", std::collections::HashMap<String, String>);
 
-    get_set_struct_from_json_value!(
+    get_set_json!(
         environment,
         with_environment,
         "environment",
+        &serde_json::Value,
         ServerEnvironment
     );
 }

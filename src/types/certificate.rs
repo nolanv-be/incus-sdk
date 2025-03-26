@@ -11,28 +11,29 @@ impl TryFrom<&serde_json::Value> for Certificate {
 }
 
 impl Certificate {
-    get_set_str!(certificate, with_certificate, "certificate");
+    get_set_json!(certificate, with_certificate, "certificate", &str);
 
-    get_set_str!(description, with_description, "description");
+    get_set_json!(description, with_description, "description", &str);
 
-    get_set_str!(fingerprint, with_fingerprint, "fingerprint");
+    get_set_json!(fingerprint, with_fingerprint, "fingerprint", &str);
 
-    get_set_str!(name, with_name, "name");
+    get_set_json!(name, with_name, "name", &str);
 
-    get_set_strs!(projects, with_projects, "projects");
+    get_set_json!(projects, with_projects, "projects", Vec<&str>);
 
-    get_set_bool!(restricted, with_restricted, "restricted");
+    get_set_json!(restricted, with_restricted, "restricted", bool);
 
-    get_set_struct_from_str!(
+    get_set_json!(
         certificate_type,
         with_certificate_type,
         "type",
+        &str,
         CertificateType
     );
 
-    get_set_bool!(token, with_token, "token");
+    get_set_json!(token, with_token, "token", bool);
 
-    get_set_str!(trust_token, with_trust_token, "trust_token");
+    get_set_json!(trust_token, with_trust_token, "trust_token", &str);
 }
 
 #[derive(serde::Serialize, Debug)]

@@ -11,9 +11,9 @@ impl TryFrom<&serde_json::Value> for StorageSupported {
 }
 
 impl StorageSupported {
-    get_set_struct_from_str!(name, with_name, "Name", Storage);
+    get_set_json!(name, with_name, "Name", &str, Storage);
 
-    get_set_bool!(remote, with_remote, "Remote");
+    get_set_json!(remote, with_remote, "Remote", bool);
 
-    get_set_str!(version, with_version, "Version");
+    get_set_json!(version, with_version, "Version", &str);
 }
