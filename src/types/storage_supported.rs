@@ -1,7 +1,7 @@
 use crate::{macros::*, types::*};
 
 #[derive(Debug, serde::Serialize)]
-pub struct StorageSupported(JsonWrapperMap);
+pub struct StorageSupported(pub JsonWrapperMap);
 impl TryFrom<&serde_json::Value> for StorageSupported {
     type Error = crate::Error;
 

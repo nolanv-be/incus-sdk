@@ -1,7 +1,7 @@
 use crate::{macros::*, types::*};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Default)]
-pub struct Server(JsonWrapperMap);
+pub struct Server(pub JsonWrapperMap);
 impl TryFrom<&serde_json::Value> for Server {
     type Error = crate::Error;
 

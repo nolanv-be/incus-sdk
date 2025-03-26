@@ -1,7 +1,7 @@
 use crate::{Error, error::FieldError, types::*};
 
 #[derive(Debug, serde::Deserialize)]
-pub struct IncusResponse(JsonWrapperMap);
+pub struct IncusResponse(pub JsonWrapperMap);
 impl TryFrom<serde_json::Value> for IncusResponse {
     type Error = crate::Error;
 
@@ -93,7 +93,7 @@ impl TryFrom<u64> for IncusResponseStatus {
 }
 
 #[derive(Debug, serde::Deserialize)]
-pub struct IncusResponseError(JsonWrapperMap);
+pub struct IncusResponseError(pub JsonWrapperMap);
 impl TryFrom<serde_json::Value> for IncusResponseError {
     type Error = crate::Error;
 
