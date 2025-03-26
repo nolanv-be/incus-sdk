@@ -4,9 +4,9 @@ use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
     pub async fn get_supported_versions(&mut self) -> Result<IncusVersionSupported, Error> {
-        Ok((&self
+        Ok(self
             .send_request_incus_raw::<()>("/", Method::GET, &[], None)
-            .await?)
+            .await?
             .metadata()?
             .into())
     }
@@ -16,16 +16,15 @@ impl IncusClient {
         target: Option<&str>,
         project: Option<&str>,
     ) -> Result<Server, Error> {
-        (&self
-            .send_request_incus::<()>(
-                &format!("{}", build_query!(target, project)),
-                Method::GET,
-                &[],
-                None,
-            )
-            .await?)
-            .metadata()?
-            .try_into()
+        self.send_request_incus::<()>(
+            &format!("{}", build_query!(target, project)),
+            Method::GET,
+            &[],
+            None,
+        )
+        .await?
+        .metadata()?
+        .try_into()
     }
 
     pub async fn patch_server(

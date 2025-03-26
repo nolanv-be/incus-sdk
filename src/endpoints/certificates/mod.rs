@@ -1,4 +1,4 @@
-use crate::{Error, IncusClient, build_query, types::*};
+use crate::{Error, IncusClient, macros::build_query, types::*};
 use http_client_unix_domain_socket::Method;
 
 impl IncusClient {
@@ -6,35 +6,35 @@ impl IncusClient {
         &mut self,
         filter: Option<&str>,
     ) -> Result<CertificateFingerprints, Error> {
-        self.send_request_incus::<(), CertificateFingerprints>(
-            &format!("/certificates{}", build_query!(filter)),
-            Method::GET,
-            &[],
-            None,
-        )
-        .await?
-        .data()
+        Ok(self
+            .send_request_incus::<()>(
+                &format!("/certificates{}", build_query!(filter)),
+                Method::GET,
+                &[],
+                None,
+            )
+            .await?
+            .metadata()?
+            .into())
     }
 
-    pub async fn get_certificate(
-        &mut self,
-        fingerprint: &str,
-    ) -> Result<CertificateReturned, Error> {
-        self.send_request_incus::<(), CertificateReturned>(
+    pub async fn get_certificate(&mut self, fingerprint: &str) -> Result<Certificate, Error> {
+        self.send_request_incus::<()>(
             &format!("/certificates/{fingerprint}"),
             Method::GET,
             &[],
             None,
         )
         .await?
-        .data()
+        .metadata()?
+        .try_into()
     }
 
     pub async fn post_certificate(
         &mut self,
         certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<Certificate, serde_json::Value>(
+        self.send_request_incus::<Certificate>(
             "/certificates",
             Method::POST,
             &[],
@@ -49,7 +49,7 @@ impl IncusClient {
         fingerprint: &str,
         certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<Certificate, serde_json::Value>(
+        self.send_request_incus::<Certificate>(
             &format!("/certificates/{fingerprint}"),
             Method::PATCH,
             &[],
@@ -64,7 +64,7 @@ impl IncusClient {
         fingerprint: &str,
         certificate: &Certificate,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<Certificate, serde_json::Value>(
+        self.send_request_incus::<Certificate>(
             &format!("/certificates/{fingerprint}"),
             Method::PUT,
             &[],
@@ -78,7 +78,7 @@ impl IncusClient {
         &mut self,
         fingerprint: &str,
     ) -> Result<IncusResponseStatus, Error> {
-        self.send_request_incus::<(), serde_json::Value>(
+        self.send_request_incus::<()>(
             &format!("/certificates/{fingerprint}"),
             Method::DELETE,
             &[],

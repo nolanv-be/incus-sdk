@@ -26,7 +26,7 @@ macro_rules! get_set_str {
             self.0.get_str($name_json)
         }
 
-        set_map!($setter, $name_rust, String, $name_json);
+        set_map!($setter, $name_rust, &str, $name_json);
     };
 }
 pub(crate) use get_set_str;
@@ -37,7 +37,7 @@ macro_rules! get_set_strs {
             self.0.get_strs($name_json)
         }
 
-        set_map!($setter, $name_rust, Vec<String>, $name_json);
+        set_map!($setter, $name_rust, Vec<&str>, $name_json);
     };
 }
 pub(crate) use get_set_strs;

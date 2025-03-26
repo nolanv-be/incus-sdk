@@ -1,66 +1,41 @@
-use crate::{
-    Error, error::FieldError, inner_split_get_str_method, inner_str_to_struct_method,
-    inner_to_bool_method, inner_to_str_method, inner_to_vec_str_method,
-};
-use serde::{Deserialize, Serialize};
+use crate::{macros::*, types::*};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct CertificateFingerprints(serde_json::Value);
-impl From<serde_json::Value> for CertificateFingerprints {
-    fn from(f: serde_json::Value) -> Self {
-        CertificateFingerprints(f.into())
-    }
-}
-impl CertificateFingerprints {
-    pub fn inner(&self) -> serde_json::Value {
-        self.0.clone()
-    }
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default, Clone)]
+pub struct Certificate(pub JsonWrapperMap);
+impl TryFrom<&serde_json::Value> for Certificate {
+    type Error = crate::Error;
 
-    inner_split_get_str_method!(fingerprints, "/", 3);
-}
-
-#[derive(Serialize, Debug)]
-pub struct Certificate {
-    pub certificate: Option<String>,
-    pub description: Option<String>,
-    pub name: Option<String>,
-    pub projects: Option<Vec<String>>,
-    pub restricted: Option<bool>,
-    pub token: Option<bool>,
-    pub trust_token: Option<String>,
-    #[serde(rename = "type")]
-    pub certificate_type: Option<CertificateType>,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct CertificateReturned(serde_json::Value);
-impl From<serde_json::Value> for CertificateReturned {
-    fn from(s: serde_json::Value) -> Self {
-        CertificateReturned(s)
+    fn try_from(json: &serde_json::Value) -> Result<Self, Self::Error> {
+        Ok(Certificate(json.clone().try_into()?))
     }
 }
 
-impl CertificateReturned {
-    pub fn inner(&self) -> serde_json::Value {
-        self.0.clone()
-    }
+impl Certificate {
+    get_set_str!(certificate, with_certificate, "certificate");
 
-    inner_to_str_method!(certificate, "certificate");
+    get_set_str!(description, with_description, "description");
 
-    inner_to_str_method!(description, "description");
+    get_set_str!(fingerprint, with_fingerprint, "fingerprint");
 
-    inner_to_str_method!(fingerprint, "fingerprint");
+    get_set_str!(name, with_name, "name");
 
-    inner_to_str_method!(name, "name");
+    get_set_strs!(projects, with_projects, "projects");
 
-    inner_to_vec_str_method!(projects, "projects");
+    get_set_bool!(restricted, with_restricted, "restricted");
 
-    inner_to_bool_method!(restricted, "restricted");
+    get_set_struct_from_str!(
+        certificate_type,
+        with_certificate_type,
+        "type",
+        CertificateType
+    );
 
-    inner_str_to_struct_method!(certificate_type, "type", CertificateType);
+    get_set_bool!(token, with_token, "token");
+
+    get_set_str!(trust_token, with_trust_token, "trust_token");
 }
 
-#[derive(Serialize, Debug)]
+#[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum CertificateType {
     Client,
@@ -75,7 +50,7 @@ impl TryFrom<&str> for CertificateType {
             "client" => Ok(CertificateType::Client),
             "server" => Ok(CertificateType::Server),
             "metrics" => Ok(CertificateType::Metrics),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

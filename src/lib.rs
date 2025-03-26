@@ -54,7 +54,7 @@ impl IncusClient {
 
         match self
             .client
-            .send_request_json::<IN, serde_json::Value, IncusResponseError>(
+            .send_request_json::<IN, serde_json::Value, IncusError>(
                 endpoint,
                 method,
                 &headers_concat,
@@ -199,21 +199,26 @@ mod tests {
             Some(&time)
         );
     }
-    /*
+
     #[tokio::test]
     async fn crud_certificate() {
         const FINGERPRINT: &str =
             "19d41e4e88554147821a6ffeec95aad6d787f9abccf57c1e13faa2d7313c26df";
-        let mut original_certificate = Certificate {
-                certificate:Some("MIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p".into()),
-                description: Some("this is a test".into()),
-                name: Some("test".into()),
-                projects: Some(vec!["default".into()]),
-                restricted: Some(true),
-                certificate_type: Some(CertificateType::Client),
-                token: None,
-                trust_token: None
-            };
+        let mut original_certificate = Certificate::default();
+
+        original_certificate
+            .with_certificate("MIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p")
+            .expect("with_certificate")
+            .with_name("test")
+            .expect("with_name")
+            .with_description("this is a test")
+            .expect("with_description")
+            .with_projects(vec!["default"])
+            .expect("with_projects")
+            .with_restricted(true)
+            .expect("with_restricted")
+            .with_certificate_type(CertificateType::Client)
+            .expect("with_certificate_type");
 
         let mut incus = IncusClient::try_default()
             .await
@@ -234,18 +239,21 @@ mod tests {
         }
 
         incus
-            .post_certificate(&original_certificate)
+            .post_certificate(&original_certificate.clone())
             .await
             .expect("incus.post_certificate");
 
-        let fingerprints = incus
+        let certificate_fingerprints = incus
             .get_certificate_fingerprints(None)
             .await
-            .expect("incus.get_certificate_fingerprints")
-            .fingerprints()
-            .expect("certificates.fingerprints");
+            .expect("incus.get_certificate_fingerprints");
 
-        assert_eq!(fingerprints, vec![FINGERPRINT.to_string()]);
+        assert_eq!(
+            certificate_fingerprints
+                .fingerprints()
+                .expect("fingerprints"),
+            vec![FINGERPRINT.to_string()]
+        );
 
         let certificate = incus
             .get_certificate(FINGERPRINT)
@@ -260,16 +268,9 @@ mod tests {
         incus
             .patch_certificate(
                 &FINGERPRINT,
-                &Certificate {
-                    certificate: None,
-                    description: None,
-                    name: Some("test2".into()),
-                    projects: None,
-                    restricted: None,
-                    token: None,
-                    trust_token: None,
-                    certificate_type: None,
-                },
+                &Certificate::default()
+                    .with_name("test2")
+                    .expect("with_name"),
             )
             .await
             .expect("incus.patch_certificate");
@@ -284,7 +285,10 @@ mod tests {
             "test2".to_string()
         );
 
-        original_certificate.certificate = Some("-----BEGIN CERTIFICATE-----\nMIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p\n-----END CERTIFICATE-----".into());
+        original_certificate
+            .with_certificate("-----BEGIN CERTIFICATE-----\nMIIFkzCCA3ugAwIBAgIUVgqIkvkqAYqe2D1lfjt+Eg7f0qEwDQYJKoZIhvcNAQENBQAwWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMB4XDTI1MDMxOTEwNTExNloXDTI2MDMxOTEwNTExNlowWTELMAkGA1UEBhMCQkUxEDAOBgNVBAgMB0hhaW5hdXQxEDAOBgNVBAcMB1RvdXJuYWkxDzANBgNVBAoMBk5vbGFuVjEVMBMGA1UEAwwMbm9sYW52LmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyPJ05zb1ejzadZpC7gXrzulvqJgWPmnwVW2E3jlYmbcd1iHFBRF7M53ddhRbadk0Tszz4AIvEp2FFd3IrPzxhC0QWW5aUrpPBixm3l/wsVYpcBlNLgqi8cdjrl9nVMJqGbIouFP9kRBPP8mqsIJG292Ffv8MUc4OJO2Ffs1FYkBMcvWGCOGnqCxoCelpw/40d61yAkjKTo5UoooVocmsfw0C2tqHaTDt47P6w94vVUKKaqIB93LXsoN4dGIqXS7xX8KWqJwvRbSyI6YOnkVlyY5cJIIeC2AWUryUmcXauDm0ONt5ykbNPnztwTEcLl6YkIFjHRenwfoNFUBL9p8ByV/V/6VBEmFP9Ko11tB63tF5pStb6c/1onZyRpeyXH5NXFb3+VrXZH96RVR0M3nBFMEz3eZC6OXByvTb2JUuzVHmbth6rbKRnXsWvFt+mk0Zd0WcsQZIhjT55Q84KqfRqOgsAE+yH1VqCqejEnGQcYHjE4RdruVP9tcDwKDlqyQTxR3o4ChLfdkMSNFErbWUEajLN9lbuimYRcsovCmgS04RCKS0u6JIiQKFb7XTqqPeMx+hAgmS33tPtYSgaPu933dphhujOgQICfdtv2rLutP/Nf18iXsh27re82s08JwhDyBuckH4RoLv8zC6v1FZTC3r2sWT9OnT3cEvKXAdvQsCAwEAAaNTMFEwHQYDVR0OBBYEFBdFuOU6V+ckVdfpBtZ64RPFARxkMB8GA1UdIwQYMBaAFBdFuOU6V+ckVdfpBtZ64RPFARxkMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQENBQADggIBAAVZs0+5um0IUiheRPp9RIPgVgZj2ExWuhLwLnOHOtF4gpzkCwgUM28P+IZQu91yH2W/xVVpt2yypft/LEHAaPIC84JVQku+vkSMxpqZGZXQcKazK+KzeJD3NsEzMUOJpD2xok9e8uzEEFp42UB2eeQfUvpi7UDbKpIG/W7F8a8qVV9IGj8GraaXW1k3CUbC5MIHSSuwk0SgGn9eDZ2v77AzgVYr7p8029FzQiH2jfIh1WxdfcEB5mqF7W8wXCIz69ubijcOeR/mHzCMXznGEMIoLRLw4muT1ZHqtRCNRVAdYbtCLIf7HbuHOE5QthKSpmMU5XXPJaloxuYmBl09UxCtDOB7KxoNcsqHBgJ1Cn6Kw2mGHE1uMJL3Qq+TPMU2HwvfFgG2kSQfnkS+l846s9gntXJoQ9nFFf3sSAdHOyNZZ0GOKbA/BgbexEPlF47qsemSh7fGxPlztnX8KDlj99hX/eMczvoBkAjeqaAt3wdXXgMJIyAQZeA0y5aJE49PvaomUblXtD+q4Hs81NaWTsGVsTqYY+Lm2TZm+sF3z3B+qTeKpTqwNf6jQ6pdf56ZOF8I9rt0JadGH0GeY00ZfBLw6o1Zx3ty3wk8reuk/pqzYnkTKDB3sh6sPr3TPGl+6EdD/B+nsKHNIDmI4eYVukUxG+zP2aZNBz3zGL19/C9p\n-----END CERTIFICATE-----")
+            .expect("with_certificate");
+
         incus
             .put_certificate(&FINGERPRINT, &original_certificate)
             .await
@@ -299,5 +303,5 @@ mod tests {
             certificate.name().expect("certificate.name"),
             "test".to_string()
         );
-    }*/
+    }
 }

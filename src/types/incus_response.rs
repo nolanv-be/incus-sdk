@@ -1,4 +1,4 @@
-use crate::{Error, error::FieldError, types::*};
+use crate::{Error, types::*};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct IncusResponse(pub JsonWrapperMap);
@@ -88,53 +88,6 @@ impl TryFrom<u64> for IncusResponseStatus {
             400 => Ok(IncusResponseStatus::Failure),
             401 => Ok(IncusResponseStatus::Cancelled),
             _ => Err(crate::error::FieldError::Unknown.into()),
-        }
-    }
-}
-
-#[derive(Debug, serde::Deserialize)]
-pub struct IncusResponseError(pub JsonWrapperMap);
-impl TryFrom<serde_json::Value> for IncusResponseError {
-    type Error = crate::Error;
-
-    fn try_from(json: serde_json::Value) -> Result<Self, Self::Error> {
-        Ok(IncusResponseError(json.try_into()?))
-    }
-}
-
-impl IncusResponseError {
-    pub fn status(&self) -> Result<IncusResponseErrorKind, Error> {
-        self.0.get_u64("error_code")?.try_into()
-    }
-
-    pub fn response_type(&self) -> Result<IncusResponseType, Error> {
-        self.0.get_str("type")?.try_into()
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum IncusResponseErrorKind {
-    BadRequest = 400,
-    Unauthorized = 401,
-    Forbidden = 403,
-    NotFound = 404,
-    Conflict = 409,
-    PreconditionFailed = 412,
-    InternalServer = 500,
-}
-impl TryFrom<u64> for IncusResponseErrorKind {
-    type Error = crate::Error;
-
-    fn try_from(code: u64) -> Result<Self, Self::Error> {
-        match code {
-            400 => Ok(IncusResponseErrorKind::BadRequest),
-            401 => Ok(IncusResponseErrorKind::Unauthorized),
-            403 => Ok(IncusResponseErrorKind::Forbidden),
-            404 => Ok(IncusResponseErrorKind::NotFound),
-            409 => Ok(IncusResponseErrorKind::Conflict),
-            412 => Ok(IncusResponseErrorKind::PreconditionFailed),
-            500 => Ok(IncusResponseErrorKind::InternalServer),
-            _ => Err(FieldError::Unknown.into()),
         }
     }
 }

@@ -3,7 +3,7 @@ use crate::types::*;
 #[derive(Debug)]
 pub enum Error {
     ClientUnix(http_client_unix_domain_socket::Error),
-    Http(IncusResponseError),
+    Http(IncusError),
     Field(FieldError),
 }
 
@@ -12,8 +12,8 @@ impl From<http_client_unix_domain_socket::Error> for Error {
         Error::ClientUnix(value)
     }
 }
-impl From<IncusResponseError> for Error {
-    fn from(e: IncusResponseError) -> Self {
+impl From<IncusError> for Error {
+    fn from(e: IncusError) -> Self {
         Error::Http(e)
     }
 }
