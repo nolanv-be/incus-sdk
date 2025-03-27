@@ -75,7 +75,7 @@ pub(crate) use get_set_json;
 
 macro_rules! set_map {
     ($method:ident, $parameter:ident, $parameter_type:ty, $name_json:expr) => {
-        pub fn $method(&mut self, $parameter: $parameter_type) -> Result<&mut Self, $crate::Error> {
+        pub fn $method(mut self, $parameter: $parameter_type) -> Result<Self, $crate::Error> {
             self.0.insert_in_map($name_json, $parameter)?;
             Ok(self)
         }
