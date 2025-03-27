@@ -1,81 +1,48 @@
-use crate::{error::FieldError, types::*};
-use serde::Serialize;
+use crate::{macros::*, types::*};
 
-#[derive(Serialize, Debug)]
-pub struct ImageSource {
-    pub alias: Option<String>,
-    pub certificate: Option<String>,
-    pub protocol: Option<ImageSourceProtocol>,
-    pub server: Option<String>,
-    pub image_type: Option<ImageType>,
-    pub mode: Option<TransferMode>,
-    pub r#type: Option<ImageSourceType>,
-    pub url: Option<String>,
-    pub name: Option<String>,
-    pub fingerprint: Option<String>,
-    pub secret: Option<String>,
-    pub project: Option<String>,
-}
-
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum TransferMode {
-    Push,
-    Pull,
-}
-impl TryFrom<&str> for TransferMode {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Default)]
+pub struct ImageSource(pub JsonWrapperMap);
+impl TryFrom<&serde_json::Value> for ImageSource {
     type Error = crate::Error;
 
-    fn try_from(cert: &str) -> Result<Self, Self::Error> {
-        match cert {
-            "push" => Ok(TransferMode::Push),
-            "pull" => Ok(TransferMode::Pull),
-            _ => Err(FieldError::Unknown.into()),
-        }
-    }
-}
-impl Into<String> for TransferMode {
-    fn into(self) -> String {
-        match self {
-            TransferMode::Push => "push".into(),
-            TransferMode::Pull => "pull".into(),
-        }
+    fn try_from(json: &serde_json::Value) -> Result<Self, Self::Error> {
+        Ok(ImageSource(json.clone().try_into()?))
     }
 }
 
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum ImageSourceProtocol {
-    Incus,
-    Direct,
-    Simplestreams,
-    Oci,
-}
-impl TryFrom<&str> for ImageSourceProtocol {
-    type Error = crate::Error;
+impl ImageSource {
+    get_set_json!(alias, with_alias, "alias", &str);
 
-    fn try_from(cert: &str) -> Result<Self, Self::Error> {
-        match cert {
-            "incus" => Ok(ImageSourceProtocol::Incus),
-            "direct" => Ok(ImageSourceProtocol::Direct),
-            "simplestreams" => Ok(ImageSourceProtocol::Simplestreams),
-            "oci" => Ok(ImageSourceProtocol::Oci),
-            _ => Err(FieldError::Unknown.into()),
-        }
-    }
-}
-impl Into<String> for ImageSourceProtocol {
-    fn into(self) -> String {
-        match self {
-            ImageSourceProtocol::Incus => "incus".into(),
-            ImageSourceProtocol::Direct => "direct".into(),
-            ImageSourceProtocol::Simplestreams => "simplestreams".into(),
-            ImageSourceProtocol::Oci => "oci".into(),
-        }
-    }
+    get_set_json!(
+        certificate,
+        with_certificate,
+        "certificate",
+        &serde_json::Value,
+        Certificate
+    );
+
+    get_set_json!(image_type, with_image_type, "image_type", &str, ImageType);
+
+    get_set_json!(protocol, with_protocol, "protocol", &str, ImageProtocol);
+
+    get_set_json!(server, with_server, "server", &str);
+
+    get_set_json!(mode, with_mode, "mode", &str, ImageTransferMode);
+
+    get_set_json!(source_type, with_source_type, "type", &str, ImageSourceType);
+
+    get_set_json!(url, with_url, "url", &str);
+
+    get_set_json!(name, with_name, "name", &str);
+
+    get_set_json!(fingerprint, with_fingerprint, "fingerprint", &str);
+
+    get_set_json!(secret, with_secret, "secret", &str);
+
+    get_set_json!(project, with_project, "project", &str);
 }
 
-#[derive(Serialize, Debug)]
+#[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum ImageSourceType {
     Instance,
@@ -92,7 +59,7 @@ impl TryFrom<&str> for ImageSourceType {
             "snapshot" => Ok(ImageSourceType::Snapshot),
             "image" => Ok(ImageSourceType::Image),
             "url" => Ok(ImageSourceType::Url),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

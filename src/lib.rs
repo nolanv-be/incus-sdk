@@ -130,6 +130,7 @@ mod tests {
         assert_eq!(server.api_version()?, "1.0");
         Ok(())
     }
+
     #[tokio::test]
     async fn get_resources() -> Result<(), crate::Error> {
         let mut incus = IncusClient::try_default().await?;
@@ -225,6 +226,16 @@ mod tests {
 
         assert_eq!(certificate.name()?, "test".to_string());
 
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn crud_images() -> Result<(), crate::Error> {
+        let mut incus = IncusClient::try_default().await?;
+
+        let image_fingerprints = incus.get_image_fingerprints(None, None, None).await?;
+
+        assert_eq!(image_fingerprints.fingerprints()?, Vec::<&str>::new());
         Ok(())
     }
 }
