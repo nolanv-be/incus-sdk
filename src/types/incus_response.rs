@@ -43,7 +43,7 @@ impl TryFrom<&str> for IncusResponseType {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum IncusResponseStatus {
     OperationCreated = 100,
     Started = 101,

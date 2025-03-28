@@ -41,6 +41,13 @@ macro_rules! get_set_json {
 
         set_map!($setter, $name_rust, $output, $name_json);
     };
+    ($name_rust:ident, $setter:ident, $name_json:expr, u64, $output:ident) => {
+        pub fn $name_rust(&self) -> Result<$output, $crate::Error> {
+            self.0.get_u64($name_json)?.try_into()
+        }
+
+        set_map!($setter, $name_rust, $output, $name_json);
+    };
     ($name_rust:ident, $setter:ident, $name_json:expr, &serde_json::Value, $output:ident) => {
         pub fn $name_rust(&self) -> Result<$output, $crate::Error> {
             self.0.get_json_value($name_json)?.try_into()
