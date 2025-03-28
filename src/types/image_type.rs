@@ -16,11 +16,3 @@ impl TryFrom<&str> for ImageType {
         }
     }
 }
-impl Into<String> for ImageType {
-    fn into(self) -> String {
-        match self {
-            ImageType::Container => "client".into(),
-            ImageType::VirtualMachine => "virtual-machine".into(),
-        }
-    }
-}

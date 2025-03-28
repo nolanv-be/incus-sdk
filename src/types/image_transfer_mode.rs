@@ -15,11 +15,3 @@ impl TryFrom<&str> for ImageTransferMode {
         }
     }
 }
-impl Into<String> for ImageTransferMode {
-    fn into(self) -> String {
-        match self {
-            ImageTransferMode::Push => "push".into(),
-            ImageTransferMode::Pull => "pull".into(),
-        }
-    }
-}
