@@ -57,10 +57,7 @@ impl IncusClient {
         .status()
     }
 
-    pub async fn get_resources(
-        &mut self,
-        target: Option<&str>,
-    ) -> Result<serde_json::Value, Error> {
+    pub async fn get_resources(&mut self, target: Option<&str>) -> Result<JsonWrapperMap, Error> {
         self.send_request_incus::<()>(
             &format!("/resources{}", build_query!(target)),
             Method::GET,
@@ -68,7 +65,7 @@ impl IncusClient {
             None,
         )
         .await?
-        .metadata()
-        .map(|m| m.clone())
+        .metadata()?
+        .try_into()
     }
 }

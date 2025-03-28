@@ -78,9 +78,8 @@ impl IncusClient {
 // TODO Temporary test while implementing
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use super::*;
+    use std::collections::HashMap;
 
     #[tokio::test]
     async fn get_supported_version() -> Result<(), crate::Error> {
@@ -138,10 +137,12 @@ mod tests {
         let resources = incus.get_resources(None).await?;
 
         assert_eq!(
-            resources
-                .get("cpu")
-                .map(|cpu| cpu.get("architecture").map(|arch| arch.as_str())),
-            Some(Some(Some("x86_64")))
+            Architecture::try_from(
+                resources
+                    .get_json_wrapper_map("cpu")?
+                    .get_str("architecture")?
+            )?,
+            Architecture::X86_64
         );
         Ok(())
     }

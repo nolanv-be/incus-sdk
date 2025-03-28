@@ -20,6 +20,15 @@ impl TryFrom<serde_json::Value> for JsonWrapperMap {
             .map(|m| JsonWrapper(m.clone()))
     }
 }
+impl TryFrom<&serde_json::Value> for JsonWrapperMap {
+    type Error = crate::Error;
+
+    fn try_from(json: &serde_json::Value) -> Result<Self, Self::Error> {
+        json.as_object()
+            .ok_or(crate::error::FieldError::Invalid.into())
+            .map(|m| JsonWrapper(m.clone()))
+    }
+}
 impl JsonWrapperMap {
     pub fn get_bool(&self, key: &str) -> Result<bool, Error> {
         self.0
@@ -71,6 +80,10 @@ impl JsonWrapperMap {
             .ok_or(FieldError::Missing)?
             .as_array()
             .ok_or(FieldError::Invalid.into())
+    }
+
+    pub fn get_json_wrapper_map(&self, key: &str) -> Result<JsonWrapperMap, Error> {
+        self.0.get(key).ok_or(FieldError::Missing)?.try_into()
     }
 
     pub fn insert_in_map<V: serde::Serialize>(&mut self, key: &str, value: V) -> Result<(), Error> {
