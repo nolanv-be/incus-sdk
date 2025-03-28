@@ -1,4 +1,5 @@
 #[derive(Debug, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Architecture {
     I686,
     X86_64,

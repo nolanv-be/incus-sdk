@@ -1,7 +1,10 @@
 #[derive(Debug, Eq, PartialEq, serde::Serialize)]
 pub enum ServerEventMode {
+    #[serde(rename = "full-mesh")]
     FullMesh,
+    #[serde(rename = "hub-server")]
     HubServer,
+    #[serde(rename = "hub-client")]
     HubClient,
 }
 impl TryFrom<&str> for ServerEventMode {

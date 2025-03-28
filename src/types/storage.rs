@@ -1,4 +1,5 @@
 #[derive(Debug, Eq, PartialEq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Storage {
     Btrfs,
     Ceph,

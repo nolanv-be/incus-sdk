@@ -1,7 +1,5 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum AuthMethod {
     Tls,
     Oidc,
@@ -13,7 +11,7 @@ impl TryFrom<&str> for AuthMethod {
         match method {
             "tls" => Ok(AuthMethod::Tls),
             "oidc" => Ok(AuthMethod::Oidc),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }

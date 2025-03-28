@@ -1,7 +1,4 @@
-use crate::error::FieldError;
-use serde::Serialize;
-
-#[derive(Serialize, Debug)]
+#[derive(serde::Serialize, Debug)]
 pub enum ImageType {
     #[serde(rename = "container")]
     Container,
@@ -15,7 +12,7 @@ impl TryFrom<&str> for ImageType {
         match cert {
             "container" => Ok(ImageType::Container),
             "virtual-machine" => Ok(ImageType::VirtualMachine),
-            _ => Err(FieldError::Unknown.into()),
+            _ => Err(crate::error::FieldError::Unknown.into()),
         }
     }
 }
